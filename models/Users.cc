@@ -21,6 +21,9 @@ const std::string Users::Cols::_motto = "motto";
 const std::string Users::Cols::_region = "region";
 const std::string Users::Cols::_avatar = "avatar";
 const std::string Users::Cols::_avatar_hash = "avatar_hash";
+const std::string Users::Cols::_password = "password";
+const std::string Users::Cols::_permission = "permission";
+const std::string Users::Cols::_is_new = "is_new";
 const std::string Users::primaryKeyName = "id";
 const bool Users::hasPrimaryKey = true;
 const std::string Users::tableName = "users";
@@ -33,7 +36,10 @@ const std::vector<typename Users::MetaData> Users::metaData_={
 {"motto","std::string","text",0,0,0,0},
 {"region","int32_t","integer",4,0,0,0},
 {"avatar","std::string","text",0,0,0,0},
-{"avatar_hash","std::string","text",0,0,0,0}
+{"avatar_hash","std::string","text",0,0,0,0},
+{"password","std::string","text",0,0,0,0},
+{"permission","int32_t","integer",4,0,0,1},
+{"is_new","bool","boolean",1,0,0,1}
 };
 const std::string &Users::getColumnName(size_t index) noexcept(false)
 {
@@ -76,11 +82,23 @@ Users::Users(const Row &r, const ssize_t indexOffset) noexcept
         {
             avatarHash_=std::make_shared<std::string>(r["avatar_hash"].as<std::string>());
         }
+        if(!r["password"].isNull())
+        {
+            password_=std::make_shared<std::string>(r["password"].as<std::string>());
+        }
+        if(!r["permission"].isNull())
+        {
+            permission_=std::make_shared<int32_t>(r["permission"].as<int32_t>());
+        }
+        if(!r["is_new"].isNull())
+        {
+            isNew_=std::make_shared<bool>(r["is_new"].as<bool>());
+        }
     }
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 8 > r.size())
+        if(offset + 11 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
@@ -126,13 +144,28 @@ Users::Users(const Row &r, const ssize_t indexOffset) noexcept
         {
             avatarHash_=std::make_shared<std::string>(r[index].as<std::string>());
         }
+        index = offset + 8;
+        if(!r[index].isNull())
+        {
+            password_=std::make_shared<std::string>(r[index].as<std::string>());
+        }
+        index = offset + 9;
+        if(!r[index].isNull())
+        {
+            permission_=std::make_shared<int32_t>(r[index].as<int32_t>());
+        }
+        index = offset + 10;
+        if(!r[index].isNull())
+        {
+            isNew_=std::make_shared<bool>(r[index].as<bool>());
+        }
     }
 
 }
 
 Users::Users(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 8)
+    if(pMasqueradingVector.size() != 11)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -199,6 +232,30 @@ Users::Users(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         if(!pJson[pMasqueradingVector[7]].isNull())
         {
             avatarHash_=std::make_shared<std::string>(pJson[pMasqueradingVector[7]].asString());
+        }
+    }
+    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
+    {
+        dirtyFlag_[8] = true;
+        if(!pJson[pMasqueradingVector[8]].isNull())
+        {
+            password_=std::make_shared<std::string>(pJson[pMasqueradingVector[8]].asString());
+        }
+    }
+    if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
+    {
+        dirtyFlag_[9] = true;
+        if(!pJson[pMasqueradingVector[9]].isNull())
+        {
+            permission_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[9]].asInt64());
+        }
+    }
+    if(!pMasqueradingVector[10].empty() && pJson.isMember(pMasqueradingVector[10]))
+    {
+        dirtyFlag_[10] = true;
+        if(!pJson[pMasqueradingVector[10]].isNull())
+        {
+            isNew_=std::make_shared<bool>(pJson[pMasqueradingVector[10]].asBool());
         }
     }
 }
@@ -269,12 +326,36 @@ Users::Users(const Json::Value &pJson) noexcept(false)
             avatarHash_=std::make_shared<std::string>(pJson["avatar_hash"].asString());
         }
     }
+    if(pJson.isMember("password"))
+    {
+        dirtyFlag_[8]=true;
+        if(!pJson["password"].isNull())
+        {
+            password_=std::make_shared<std::string>(pJson["password"].asString());
+        }
+    }
+    if(pJson.isMember("permission"))
+    {
+        dirtyFlag_[9]=true;
+        if(!pJson["permission"].isNull())
+        {
+            permission_=std::make_shared<int32_t>((int32_t)pJson["permission"].asInt64());
+        }
+    }
+    if(pJson.isMember("is_new"))
+    {
+        dirtyFlag_[10]=true;
+        if(!pJson["is_new"].isNull())
+        {
+            isNew_=std::make_shared<bool>(pJson["is_new"].asBool());
+        }
+    }
 }
 
 void Users::updateByMasqueradedJson(const Json::Value &pJson,
                                             const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 8)
+    if(pMasqueradingVector.size() != 11)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -342,6 +423,30 @@ void Users::updateByMasqueradedJson(const Json::Value &pJson,
             avatarHash_=std::make_shared<std::string>(pJson[pMasqueradingVector[7]].asString());
         }
     }
+    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
+    {
+        dirtyFlag_[8] = true;
+        if(!pJson[pMasqueradingVector[8]].isNull())
+        {
+            password_=std::make_shared<std::string>(pJson[pMasqueradingVector[8]].asString());
+        }
+    }
+    if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
+    {
+        dirtyFlag_[9] = true;
+        if(!pJson[pMasqueradingVector[9]].isNull())
+        {
+            permission_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[9]].asInt64());
+        }
+    }
+    if(!pMasqueradingVector[10].empty() && pJson.isMember(pMasqueradingVector[10]))
+    {
+        dirtyFlag_[10] = true;
+        if(!pJson[pMasqueradingVector[10]].isNull())
+        {
+            isNew_=std::make_shared<bool>(pJson[pMasqueradingVector[10]].asBool());
+        }
+    }
 }
 
 void Users::updateByJson(const Json::Value &pJson) noexcept(false)
@@ -407,6 +512,30 @@ void Users::updateByJson(const Json::Value &pJson) noexcept(false)
         if(!pJson["avatar_hash"].isNull())
         {
             avatarHash_=std::make_shared<std::string>(pJson["avatar_hash"].asString());
+        }
+    }
+    if(pJson.isMember("password"))
+    {
+        dirtyFlag_[8] = true;
+        if(!pJson["password"].isNull())
+        {
+            password_=std::make_shared<std::string>(pJson["password"].asString());
+        }
+    }
+    if(pJson.isMember("permission"))
+    {
+        dirtyFlag_[9] = true;
+        if(!pJson["permission"].isNull())
+        {
+            permission_=std::make_shared<int32_t>((int32_t)pJson["permission"].asInt64());
+        }
+    }
+    if(pJson.isMember("is_new"))
+    {
+        dirtyFlag_[10] = true;
+        if(!pJson["is_new"].isNull())
+        {
+            isNew_=std::make_shared<bool>(pJson["is_new"].asBool());
         }
     }
 }
@@ -612,6 +741,67 @@ void Users::setAvatarHashToNull() noexcept
     dirtyFlag_[7] = true;
 }
 
+const std::string &Users::getValueOfPassword() const noexcept
+{
+    const static std::string defaultValue = std::string();
+    if(password_)
+        return *password_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Users::getPassword() const noexcept
+{
+    return password_;
+}
+void Users::setPassword(const std::string &pPassword) noexcept
+{
+    password_ = std::make_shared<std::string>(pPassword);
+    dirtyFlag_[8] = true;
+}
+void Users::setPassword(std::string &&pPassword) noexcept
+{
+    password_ = std::make_shared<std::string>(std::move(pPassword));
+    dirtyFlag_[8] = true;
+}
+void Users::setPasswordToNull() noexcept
+{
+    password_.reset();
+    dirtyFlag_[8] = true;
+}
+
+const int32_t &Users::getValueOfPermission() const noexcept
+{
+    const static int32_t defaultValue = int32_t();
+    if(permission_)
+        return *permission_;
+    return defaultValue;
+}
+const std::shared_ptr<int32_t> &Users::getPermission() const noexcept
+{
+    return permission_;
+}
+void Users::setPermission(const int32_t &pPermission) noexcept
+{
+    permission_ = std::make_shared<int32_t>(pPermission);
+    dirtyFlag_[9] = true;
+}
+
+const bool &Users::getValueOfIsNew() const noexcept
+{
+    const static bool defaultValue = bool();
+    if(isNew_)
+        return *isNew_;
+    return defaultValue;
+}
+const std::shared_ptr<bool> &Users::getIsNew() const noexcept
+{
+    return isNew_;
+}
+void Users::setIsNew(const bool &pIsNew) noexcept
+{
+    isNew_ = std::make_shared<bool>(pIsNew);
+    dirtyFlag_[10] = true;
+}
+
 void Users::updateId(const uint64_t id)
 {
 }
@@ -625,7 +815,10 @@ const std::vector<std::string> &Users::insertColumns() noexcept
         "motto",
         "region",
         "avatar",
-        "avatar_hash"
+        "avatar_hash",
+        "password",
+        "permission",
+        "is_new"
     };
     return inCols;
 }
@@ -709,6 +902,39 @@ void Users::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
+    if(dirtyFlag_[8])
+    {
+        if(getPassword())
+        {
+            binder << getValueOfPassword();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[9])
+    {
+        if(getPermission())
+        {
+            binder << getValueOfPermission();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[10])
+    {
+        if(getIsNew())
+        {
+            binder << getValueOfIsNew();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
 }
 
 const std::vector<std::string> Users::updateColumns() const
@@ -741,6 +967,18 @@ const std::vector<std::string> Users::updateColumns() const
     if(dirtyFlag_[7])
     {
         ret.push_back(getColumnName(7));
+    }
+    if(dirtyFlag_[8])
+    {
+        ret.push_back(getColumnName(8));
+    }
+    if(dirtyFlag_[9])
+    {
+        ret.push_back(getColumnName(9));
+    }
+    if(dirtyFlag_[10])
+    {
+        ret.push_back(getColumnName(10));
     }
     return ret;
 }
@@ -824,6 +1062,39 @@ void Users::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
+    if(dirtyFlag_[8])
+    {
+        if(getPassword())
+        {
+            binder << getValueOfPassword();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[9])
+    {
+        if(getPermission())
+        {
+            binder << getValueOfPermission();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[10])
+    {
+        if(getIsNew())
+        {
+            binder << getValueOfIsNew();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
 }
 Json::Value Users::toJson() const
 {
@@ -892,6 +1163,30 @@ Json::Value Users::toJson() const
     {
         ret["avatar_hash"]=Json::Value();
     }
+    if(getPassword())
+    {
+        ret["password"]=getValueOfPassword();
+    }
+    else
+    {
+        ret["password"]=Json::Value();
+    }
+    if(getPermission())
+    {
+        ret["permission"]=getValueOfPermission();
+    }
+    else
+    {
+        ret["permission"]=Json::Value();
+    }
+    if(getIsNew())
+    {
+        ret["is_new"]=getValueOfIsNew();
+    }
+    else
+    {
+        ret["is_new"]=Json::Value();
+    }
     return ret;
 }
 
@@ -899,7 +1194,7 @@ Json::Value Users::toMasqueradedJson(
     const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 8)
+    if(pMasqueradingVector.size() == 11)
     {
         if(!pMasqueradingVector[0].empty())
         {
@@ -989,6 +1284,39 @@ Json::Value Users::toMasqueradedJson(
                 ret[pMasqueradingVector[7]]=Json::Value();
             }
         }
+        if(!pMasqueradingVector[8].empty())
+        {
+            if(getPassword())
+            {
+                ret[pMasqueradingVector[8]]=getValueOfPassword();
+            }
+            else
+            {
+                ret[pMasqueradingVector[8]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[9].empty())
+        {
+            if(getPermission())
+            {
+                ret[pMasqueradingVector[9]]=getValueOfPermission();
+            }
+            else
+            {
+                ret[pMasqueradingVector[9]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[10].empty())
+        {
+            if(getIsNew())
+            {
+                ret[pMasqueradingVector[10]]=getValueOfIsNew();
+            }
+            else
+            {
+                ret[pMasqueradingVector[10]]=Json::Value();
+            }
+        }
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
@@ -1056,6 +1384,30 @@ Json::Value Users::toMasqueradedJson(
     {
         ret["avatar_hash"]=Json::Value();
     }
+    if(getPassword())
+    {
+        ret["password"]=getValueOfPassword();
+    }
+    else
+    {
+        ret["password"]=Json::Value();
+    }
+    if(getPermission())
+    {
+        ret["permission"]=getValueOfPermission();
+    }
+    else
+    {
+        ret["permission"]=Json::Value();
+    }
+    if(getIsNew())
+    {
+        ret["is_new"]=getValueOfIsNew();
+    }
+    else
+    {
+        ret["is_new"]=Json::Value();
+    }
     return ret;
 }
 
@@ -1101,13 +1453,28 @@ bool Users::validateJsonForCreation(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(7, "avatar_hash", pJson["avatar_hash"], err, true))
             return false;
     }
+    if(pJson.isMember("password"))
+    {
+        if(!validJsonOfField(8, "password", pJson["password"], err, true))
+            return false;
+    }
+    if(pJson.isMember("permission"))
+    {
+        if(!validJsonOfField(9, "permission", pJson["permission"], err, true))
+            return false;
+    }
+    if(pJson.isMember("is_new"))
+    {
+        if(!validJsonOfField(10, "is_new", pJson["is_new"], err, true))
+            return false;
+    }
     return true;
 }
 bool Users::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                                                const std::vector<std::string> &pMasqueradingVector,
                                                std::string &err)
 {
-    if(pMasqueradingVector.size() != 8)
+    if(pMasqueradingVector.size() != 11)
     {
         err = "Bad masquerading vector";
         return false;
@@ -1177,6 +1544,30 @@ bool Users::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                   return false;
           }
       }
+      if(!pMasqueradingVector[8].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[8]))
+          {
+              if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, true))
+                  return false;
+          }
+      }
+      if(!pMasqueradingVector[9].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[9]))
+          {
+              if(!validJsonOfField(9, pMasqueradingVector[9], pJson[pMasqueradingVector[9]], err, true))
+                  return false;
+          }
+      }
+      if(!pMasqueradingVector[10].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[10]))
+          {
+              if(!validJsonOfField(10, pMasqueradingVector[10], pJson[pMasqueradingVector[10]], err, true))
+                  return false;
+          }
+      }
     }
     catch(const Json::LogicError &e)
     {
@@ -1232,13 +1623,28 @@ bool Users::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(7, "avatar_hash", pJson["avatar_hash"], err, false))
             return false;
     }
+    if(pJson.isMember("password"))
+    {
+        if(!validJsonOfField(8, "password", pJson["password"], err, false))
+            return false;
+    }
+    if(pJson.isMember("permission"))
+    {
+        if(!validJsonOfField(9, "permission", pJson["permission"], err, false))
+            return false;
+    }
+    if(pJson.isMember("is_new"))
+    {
+        if(!validJsonOfField(10, "is_new", pJson["is_new"], err, false))
+            return false;
+    }
     return true;
 }
 bool Users::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                              const std::vector<std::string> &pMasqueradingVector,
                                              std::string &err)
 {
-    if(pMasqueradingVector.size() != 8)
+    if(pMasqueradingVector.size() != 11)
     {
         err = "Bad masquerading vector";
         return false;
@@ -1287,6 +1693,21 @@ bool Users::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
       if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
       {
           if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
+      {
+          if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
+      {
+          if(!validJsonOfField(9, pMasqueradingVector[9], pJson[pMasqueradingVector[9]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[10].empty() && pJson.isMember(pMasqueradingVector[10]))
+      {
+          if(!validJsonOfField(10, pMasqueradingVector[10], pJson[pMasqueradingVector[10]], err, false))
               return false;
       }
     }
@@ -1395,6 +1816,41 @@ bool Users::validJsonOfField(size_t index,
                 return true;
             }
             if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 8:
+            if(pJson.isNull())
+            {
+                return true;
+            }
+            if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 9:
+            if(pJson.isNull())
+            {
+                err="The " + fieldName + " column cannot be null";
+                return false;
+            }
+            if(!pJson.isInt())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 10:
+            if(pJson.isNull())
+            {
+                err="The " + fieldName + " column cannot be null";
+                return false;
+            }
+            if(!pJson.isBool())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;

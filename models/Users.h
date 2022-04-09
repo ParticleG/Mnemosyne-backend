@@ -50,6 +50,9 @@ class Users
         static const std::string _region;
         static const std::string _avatar;
         static const std::string _avatar_hash;
+        static const std::string _password;
+        static const std::string _permission;
+        static const std::string _is_new;
     };
 
     const static int primaryKeyNumber;
@@ -177,8 +180,34 @@ class Users
     void setAvatarHash(std::string &&pAvatarHash) noexcept;
     void setAvatarHashToNull() noexcept;
 
+    /**  For column password  */
+    ///Get the value of the column password, returns the default value if the column is null
+    const std::string &getValueOfPassword() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getPassword() const noexcept;
+    ///Set the value of the column password
+    void setPassword(const std::string &pPassword) noexcept;
+    void setPassword(std::string &&pPassword) noexcept;
+    void setPasswordToNull() noexcept;
 
-    static size_t getColumnNumber() noexcept {  return 8;  }
+    /**  For column permission  */
+    ///Get the value of the column permission, returns the default value if the column is null
+    const int32_t &getValueOfPermission() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<int32_t> &getPermission() const noexcept;
+    ///Set the value of the column permission
+    void setPermission(const int32_t &pPermission) noexcept;
+
+    /**  For column is_new  */
+    ///Get the value of the column is_new, returns the default value if the column is null
+    const bool &getValueOfIsNew() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<bool> &getIsNew() const noexcept;
+    ///Set the value of the column is_new
+    void setIsNew(const bool &pIsNew) noexcept;
+
+
+    static size_t getColumnNumber() noexcept {  return 11;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -203,6 +232,9 @@ class Users
     std::shared_ptr<int32_t> region_;
     std::shared_ptr<std::string> avatar_;
     std::shared_ptr<std::string> avatarHash_;
+    std::shared_ptr<std::string> password_;
+    std::shared_ptr<int32_t> permission_;
+    std::shared_ptr<bool> isNew_;
     struct MetaData
     {
         const std::string colName_;
@@ -214,7 +246,7 @@ class Users
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[8]={ false };
+    bool dirtyFlag_[11]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -271,6 +303,23 @@ class Users
             sql += "avatar_hash,";
             ++parametersCount;
         }
+        if(dirtyFlag_[8])
+        {
+            sql += "password,";
+            ++parametersCount;
+        }
+        sql += "permission,";
+        ++parametersCount;
+        if(!dirtyFlag_[9])
+        {
+            needSelection=true;
+        }
+        sql += "is_new,";
+        ++parametersCount;
+        if(!dirtyFlag_[10])
+        {
+            needSelection=true;
+        }
         needSelection=true;
         if(parametersCount > 0)
         {
@@ -326,6 +375,29 @@ class Users
         {
             n = sprintf(placeholderStr,"$%d,",placeholder++);
             sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[8])
+        {
+            n = sprintf(placeholderStr,"$%d,",placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[9])
+        {
+            n = sprintf(placeholderStr,"$%d,",placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        else
+        {
+            sql +="default,";
+        }
+        if(dirtyFlag_[10])
+        {
+            n = sprintf(placeholderStr,"$%d,",placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        else
+        {
+            sql +="default,";
         }
         if(parametersCount > 0)
         {

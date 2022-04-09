@@ -29,28 +29,29 @@ find_package(cryptopp CONFIG REQUIRED)
 find_library(CPPREDIS_LIB cpp_redis)
 find_package(Drogon CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
-find_mailIO(MAILIO_INCLUDE_DIR MAILIO_LIB)
+find_package(mailio CONFIG REQUIRED)
 find_library(TACOPIE_LIB tacopie)
 
-add_compile_definitions(CMAKE_PROJECT_NAME=std::string\("${PROJECT_NAME}"\))
+add_compile_definitions(CMAKE_PROJECT_NAME="${PROJECT_NAME}")
 
 add_executable(${PROJECT_NAME} main.cc)
 
 aux_source_directory(controllers CTL_SRC)
 aux_source_directory(filters FILTER_SRC)
 aux_source_directory(helpers HELPER_SRC)
+aux_source_directory(models MODEL_SRC)
 aux_source_directory(plugins PLUGIN_SRC)
 aux_source_directory(structures STRUCT_SRC)
-aux_source_directory(services SVC_SRC)
 aux_source_directory(types TYPE_SRC)
 aux_source_directory(utils UTIL_SRC)
 
 target_sources(${PROJECT_NAME} PRIVATE
         ${CTL_SRC}
         ${FILTER_SRC}
+        ${HELPER_SRC}
+        ${MODEL_SRC}
         ${PLUGIN_SRC}
         ${STRUCT_SRC}
-        ${SVC_SRC}
         ${TYPE_SRC}
         ${UTIL_SRC}
         ${HELPER_SRC})
@@ -61,7 +62,7 @@ target_link_libraries(
         ${CPPREDIS_LIB}
         cryptopp-static
         Drogon::Drogon
-        ${MAILIO_LIB}
+        mailio
         magic_enum::magic_enum
         ${TACOPIE_LIB}
 )
@@ -70,12 +71,15 @@ target_include_directories(
         ${PROJECT_NAME}
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        PRIVATE
-        ${MAILIO_INCLUDE_DIR}
 )
 
-drogon_create_views(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/views
-                    ${CMAKE_CURRENT_BINARY_DIR})
+install(
+        FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/config.json
+        ${CMAKE_CURRENT_SOURCE_DIR}/verifyEmail.html
+        DESTINATION
+        ${CMAKE_BINARY_DIR}
+)
 
 # use the following line to create views with namespaces.
 # drogon_create_views(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/views
