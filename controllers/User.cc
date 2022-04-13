@@ -7,7 +7,7 @@
 
 using namespace drogon;
 using namespace std;
-using namespace mnemosyne::api::v2;
+using namespace mnemosyne::api::v1;
 using namespace mnemosyne::helpers;
 using namespace mnemosyne::plugins;
 using namespace mnemosyne::structures;

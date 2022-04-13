@@ -8,15 +8,13 @@
 #include <helpers/I18nHelper.h>
 
 /**
- * @brief This filter checks param "userId" and set attribute "userId"
- * @param userId: in query string
- * @return userId: Int64
+ * @brief This filter allows the client to specify the options for the response.
  */
 
 namespace mnemosyne::filters {
-    class CheckUserId :
-            public drogon::HttpFilter<CheckUserId>,
-            public helpers::I18nHelper<CheckUserId> {
+    class AllowOptions :
+            public drogon::HttpFilter<AllowOptions>,
+            public helpers::I18nHelper<AllowOptions> {
     public:
         static constexpr char projectName[] = CMAKE_PROJECT_NAME;
 

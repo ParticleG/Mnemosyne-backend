@@ -8,15 +8,15 @@
 #include <helpers/I18nHelper.h>
 
 /**
- * @brief This filter checks param "userId" and set attribute "userId"
- * @param userId: in query string
- * @return userId: Int64
+ * @brief This filter checks header "x-refresh-token" and set attribute "refreshToken"
+ * @param x-refresh-token: in header
+ * @return refreshToken: String
  */
 
 namespace mnemosyne::filters {
-    class CheckUserId :
-            public drogon::HttpFilter<CheckUserId>,
-            public helpers::I18nHelper<CheckUserId> {
+    class CheckRefreshToken :
+            public drogon::HttpFilter<CheckRefreshToken>,
+            public helpers::I18nHelper<CheckRefreshToken> {
     public:
         static constexpr char projectName[] = CMAKE_PROJECT_NAME;
 

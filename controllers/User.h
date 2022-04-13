@@ -8,7 +8,7 @@
 #include <plugins/DataManager.h>
 #include <structures/ExceptionHandlers.h>
 
-namespace mnemosyne::api::v2 {
+namespace mnemosyne::api::v1 {
     class User :
             public drogon::HttpController<User>,
             public structures::ResponseJsonHandler,

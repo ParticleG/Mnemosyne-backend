@@ -53,5 +53,6 @@ void ResponseJson::httpCallback(const ResponseJson::HttpCallback &callback, cons
     auto httpJsonResponse = HttpResponse::newHttpJsonResponse(_value);
     httpJsonResponse->setStatusCode(_statusCode);
     httpJsonResponse->addHeader("Access-Control-Allow-Origin", cors);
+    httpJsonResponse->addHeader("Access-Control-Allow-Headers", cors);
     callback(httpJsonResponse);
 }

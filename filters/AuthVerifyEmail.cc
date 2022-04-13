@@ -18,6 +18,7 @@ void AuthVerifyEmail::doFilter(
 ) {
     handleExceptions([&]() {
         auto request = RequestJson(req);
+        LOG_DEBUG << request.stringify();
         request.require("email", JsonValue::String);
         req->attributes()->insert("requestJson", request);
         nextCb();
