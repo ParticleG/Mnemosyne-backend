@@ -8,16 +8,19 @@
 #include <helpers/I18nHelper.h>
 
 /**
- * @brief This filter allows the client to specify the options for the response.
+ * @brief This filter checks url parameter "dataType"
+ * @param dataType: in query string
+ * @return dataType: in request attributes
  */
 
 namespace mnemosyne::filters {
-    class AllowOptions :
-            public drogon::HttpFilter<AllowOptions>,
-            public helpers::I18nHelper<AllowOptions> {
+    class CheckDataType :
+            public drogon::HttpFilter<CheckDataType, false>,
+            public helpers::I18nHelper<CheckDataType> {
     public:
         static constexpr char projectName[] = CMAKE_PROJECT_NAME;
 
+    public:
         void doFilter(
                 const drogon::HttpRequestPtr &req,
                 drogon::FilterCallback &&failedCb,

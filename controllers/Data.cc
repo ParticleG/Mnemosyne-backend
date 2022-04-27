@@ -2,8 +2,9 @@
 // Created by particleg on 2021/9/24.
 //
 
-#include <controllers/User.h>
+#include <controllers/Data.h>
 #include <helpers/ResponseJson.h>
+#include <types/DataType.h>
 
 using namespace drogon;
 using namespace std;
@@ -13,7 +14,7 @@ using namespace mnemosyne::plugins;
 using namespace mnemosyne::structures;
 using namespace mnemosyne::types;
 
-User::User() :
+Data::Data() :
         ResponseJsonHandler(
                 [](const ResponseException &e, ResponseJson &response) {
                     response.setStatusCode(e.statusCode());
@@ -34,37 +35,58 @@ User::User() :
                     response.setReason(e);
                 }
         ),
+        _dataManager(app().getPlugin<DataManager>()),
         _userManager(app().getPlugin<UserManager>()) {}
 
-void User::getInfo(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+void Data::upload(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        response.setData(_userManager->getUserInfo(
-                req->attributes()->get<string>("accessToken"),
-                req->attributes()->get<int64_t>("userId")
-        ));
-    }, response);
-    response.httpCallback(callback);
-}
-
-void User::updateInfo(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
-    ResponseJson response;
-    handleExceptions([&]() {
-        _userManager->updateUserInfo(
-                req->attributes()->get<string>("accessToken"),
+        _dataManager->uploadData(
+                _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<RequestJson>("requestJson")
         );
     }, response);
     response.httpCallback(callback);
 }
 
-void User::getAvatar(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+void Data::fuzzy(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        response.setData(_userManager->getAvatar(
-                req->attributes()->get<string>("accessToken"),
-                req->attributes()->get<int64_t>("userId")
+        response.setData(_dataManager->fuzzyData(
+                req->attributes()->get<RequestJson>("requestJson")
         ));
+    }, response);
+    response.httpCallback(callback);
+}
+
+void Data::search(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        response.setData(_dataManager->searchData(
+                req->attributes()->get<RequestJson>("requestJson")
+        ));
+    }, response);
+    response.httpCallback(callback);
+}
+
+void Data::modify(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        _dataManager->modifyData(
+                _userManager->getUserId(req->attributes()->get<string>("accessToken")),
+                req->attributes()->get<RequestJson>("requestJson")
+        );
+    }, response);
+    response.httpCallback(callback);
+}
+
+void Data::remove(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        _dataManager->deleteData(
+                _userManager->getUserId(req->attributes()->get<string>("accessToken")),
+                req->attributes()->get<RequestJson>("requestJson")
+        );
     }, response);
     response.httpCallback(callback);
 }

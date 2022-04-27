@@ -14,10 +14,11 @@ namespace mnemosyne::helpers {
 
         void connect(
                 const std::string &host = "127.0.0.1",
-                const size_t &port = 6379,
-                const uint32_t &timeout = 0,
-                const int32_t &retries = 0,
-                const uint32_t &interval = 0
+                size_t port = 6379,
+                int db = 0,
+                uint32_t timeout = 0,
+                int32_t retries = 0,
+                uint32_t interval = 0
         );
 
         void disconnect();
@@ -44,6 +45,12 @@ namespace mnemosyne::helpers {
         );
 
         std::string get(const std::string &key);
+
+        void setAdd(const std::string &key, const std::vector<std::string> &values);
+
+        void setRemove(const std::string &key, const std::vector<std::string> &values);
+
+        void set(const std::string &key, const std::string &value);
 
         void setEx(
                 const std::string &key,

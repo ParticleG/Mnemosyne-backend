@@ -5,7 +5,7 @@
 #pragma once
 
 #include <drogon/HttpController.h>
-#include <plugins/DataManager.h>
+#include <plugins/UserManager.h>
 #include <structures/ExceptionHandlers.h>
 
 namespace mnemosyne::api::v1 {
@@ -58,6 +58,6 @@ namespace mnemosyne::api::v1 {
         );
 
     private:
-        mnemosyne::plugins::DataManager *_dataManager;
+        mnemosyne::plugins::UserManager *_userManager;
     };
 }

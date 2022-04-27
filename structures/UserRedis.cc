@@ -2,7 +2,6 @@
 // Created by particleg on 2021/9/29.
 //
 
-#include <structures/Exceptions.h>
 #include <structures/UserRedis.h>
 #include <utils/crypto.h>
 

@@ -5,7 +5,7 @@
 #pragma once
 
 #include <drogon/HttpController.h>
-#include <plugins/DataManager.h>
+#include <plugins/UserManager.h>
 #include <structures/ExceptionHandlers.h>
 
 namespace mnemosyne::api::v1 {
@@ -83,6 +83,6 @@ namespace mnemosyne::api::v1 {
         void deactivateEmail(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
     private:
-        plugins::DataManager *_dataManager;
+        plugins::UserManager *_userManager;
     };
 }

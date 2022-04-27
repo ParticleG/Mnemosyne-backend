@@ -36,12 +36,12 @@ Auth::Auth() :
                     response.setReason(e);
                 }
         ),
-        _dataManager(app().getPlugin<DataManager>()) {}
+        _userManager(app().getPlugin<UserManager>()) {}
 
 void Auth::check(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        response.setData(_dataManager->getUserId(
+        response.setData(_userManager->getUserId(
                 req->attributes()->get<string>("accessToken")
         ));
     }, response);
@@ -51,7 +51,7 @@ void Auth::check(const HttpRequestPtr &req, function<void(const HttpResponsePtr 
 void Auth::refresh(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        response.setData(move(_dataManager->refresh(
+        response.setData(move(_userManager->refresh(
                 req->attributes()->get<string>("refreshToken")
         ).parse()));
     }, response);
@@ -61,7 +61,7 @@ void Auth::refresh(const HttpRequestPtr &req, function<void(const HttpResponsePt
 void Auth::verifyEmail(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        _dataManager->verifyEmail(
+        _userManager->verifyEmail(
                 req->attributes()->get<RequestJson>("requestJson")["email"].asString()
         );
     }, response);
@@ -73,14 +73,14 @@ void Auth::loginEmail(const HttpRequestPtr &req, function<void(const HttpRespons
     handleExceptions([&]() {
         auto request = req->attributes()->get<RequestJson>("requestJson");
         if (request.check("code", JsonValue::String)) {
-            const auto &[tokens, isNew] = _dataManager->loginEmailCode(
+            const auto &[tokens, isNew] = _userManager->loginEmailCode(
                     request["email"].asString(),
                     request["code"].asString()
             );
             if (isNew) { response.setResultCode(ResultCode::continued); }
             response.setData(move(tokens.parse()));
         } else {
-            const auto &tokens = _dataManager->loginEmailPassword(
+            const auto &tokens = _userManager->loginEmailPassword(
                     request["email"].asString(),
                     request["password"].asString()
             );
@@ -94,7 +94,7 @@ void Auth::resetEmail(const HttpRequestPtr &req, function<void(const HttpRespons
     ResponseJson response;
     handleExceptions([&]() {
         auto request = req->attributes()->get<RequestJson>("requestJson");
-        _dataManager->resetEmail(
+        _userManager->resetEmail(
                 request["email"].asString(),
                 request["code"].asString(),
                 request["newPassword"].asString()
@@ -107,7 +107,7 @@ void Auth::migrateEmail(const HttpRequestPtr &req, function<void(const HttpRespo
     ResponseJson response;
     handleExceptions([&]() {
         auto request = req->attributes()->get<RequestJson>("requestJson");
-        _dataManager->migrateEmail(
+        _userManager->migrateEmail(
                 req->attributes()->get<string>("accessToken"),
                 request["newEmail"].asString(),
                 request["code"].asString()
@@ -120,7 +120,7 @@ void Auth::deactivateEmail(const HttpRequestPtr &req, function<void(const HttpRe
     ResponseJson response;
     handleExceptions([&]() {
         auto request = req->attributes()->get<RequestJson>("requestJson");
-        _dataManager->deactivateEmail(
+        _userManager->deactivateEmail(
                 req->attributes()->get<string>("accessToken"),
                 request["code"].asString()
         );
