@@ -21,8 +21,6 @@ namespace mnemosyne::filters {
         static constexpr char projectName[] = CMAKE_PROJECT_NAME;
 
     public:
-        CheckAccessToken();
-
         void doFilter(
                 const drogon::HttpRequestPtr &req,
                 drogon::FilterCallback &&failedCb,

@@ -12,8 +12,6 @@ using namespace mnemosyne::filters;
 using namespace mnemosyne::helpers;
 using namespace mnemosyne::types;
 
-CheckAccessToken::CheckAccessToken() {}
-
 void CheckAccessToken::doFilter(
         const HttpRequestPtr &req,
         FilterCallback &&failedCb,
