@@ -8,7 +8,9 @@
 
 namespace mnemosyne::types {
     enum class DataType {
+        Any,
         Audios,
+        Binary,
         Documents,
         Ebooks,
         Images,
