@@ -50,7 +50,6 @@ void RedisHelper::disconnect() {
     }
 }
 
-// Make this method safe and efficient.
 bool RedisHelper::tokenBucket(
         const string &key,
         const chrono::microseconds &restoreInterval,
@@ -58,7 +57,6 @@ bool RedisHelper::tokenBucket(
 ) {
     const auto countKey = _baseKey + ":tokenBucket:count:" + key;
     const auto updatedKey = _baseKey + ":tokenBucket:updated:" + key;
-
     auto maxTtl = chrono::duration_cast<chrono::seconds>(restoreInterval * maxCount);
 
     uint64_t countValue;
