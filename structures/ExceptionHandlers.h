@@ -6,7 +6,6 @@
 
 #include <drogon/drogon.h>
 #include <helpers/I18nHelper.h>
-#include <helpers/MessageJson.h>
 #include <helpers/RequestJson.h>
 #include <helpers/ResponseJson.h>
 #include <structures/Exceptions.h>
@@ -85,49 +84,5 @@ namespace mnemosyne::structures {
         const ResponseExceptionHandler _responseExceptionHandler;
         const DbExceptionHandler _dbExceptionHandler;
         const GenericExceptionHandler _genericExceptionHandler;
-    };
-
-    template<class T>
-    class MessageJsonHandler : public helpers::I18nHelper<T> {
-    public:
-        void handleExceptions(
-                const std::function<void()> &mainFunction,
-                int action,
-                const drogon::WebSocketConnectionPtr &wsConnPtr
-        ) {
-            using namespace drogon;
-            using namespace std;
-            using namespace mnemosyne::helpers;
-            using namespace mnemosyne::structures;
-            using namespace mnemosyne::types;
-
-            try {
-                mainFunction();
-            } catch (const MessageException &e) {
-                MessageJson message(action);
-                message.setReason(I18nHelper<T>::i18n(e.what()));
-                if (e.error) {
-                    message.setMessageType(MessageType::error);
-                    wsConnPtr->shutdown(CloseCode::kViolation, message.stringify());
-                } else {
-                    message.setMessageType(MessageType::failed);
-                    wsConnPtr->send(message.stringify());
-                }
-            } catch (const orm::DrogonDbException &e) {
-                LOG_ERROR << e.base().what();
-                MessageJson message(action);
-                message.setReason(I18nHelper<T>::i18n("databaseError"));
-                message.setMessageType(MessageType::error);
-                wsConnPtr->shutdown(CloseCode::kViolation, message.stringify());
-            } catch (const exception &e) {
-                LOG_ERROR << e.what();
-                MessageJson message(action);
-                message.setReason(I18nHelper<T>::i18n("internalError"));
-                message.setMessageType(MessageType::error);
-                wsConnPtr->shutdown(CloseCode::kViolation, message.stringify());
-            }
-        }
-
-        virtual ~MessageJsonHandler() = default;
     };
 }
