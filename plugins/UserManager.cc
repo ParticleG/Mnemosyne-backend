@@ -4,6 +4,7 @@
 
 #include <drogon/drogon.h>
 #include <plugins/UserManager.h>
+#include <structures/ExceptionHandlers.h>
 #include <structures/Exceptions.h>
 #include <utils/crypto.h>
 #include <utils/data.h>
@@ -24,7 +25,9 @@ void UserManager::initAndStart(const Json::Value &config) {
             config["tokenBucket"]["ip"]["interval"].isUInt64() &&
             config["tokenBucket"]["ip"]["maxCount"].isUInt64() &&
             config["tokenBucket"]["email"]["interval"].isUInt64() &&
-            config["tokenBucket"]["email"]["maxCount"].isUInt64()
+            config["tokenBucket"]["email"]["maxCount"].isUInt64() &&
+            config["tokenBucket"]["phone"]["interval"].isUInt64() &&
+            config["tokenBucket"]["phone"]["maxCount"].isUInt64()
     )) {
         LOG_ERROR << R"(Invalid tokenBucket config)";
         abort();
@@ -33,6 +36,8 @@ void UserManager::initAndStart(const Json::Value &config) {
     _ipMaxCount = config["tokenBucket"]["ip"]["maxCount"].asUInt64();
     _emailInterval = chrono::seconds(config["tokenBucket"]["email"]["interval"].asUInt64());
     _emailMaxCount = config["tokenBucket"]["email"]["maxCount"].asUInt64();
+    _phoneInterval = chrono::seconds(config["tokenBucket"]["phone"]["interval"].asUInt64());
+    _phoneMaxCount = config["tokenBucket"]["phone"]["maxCount"].asUInt64();
 
     if (!(
             config["smtp"]["server"].isString() &&
@@ -57,9 +62,10 @@ void UserManager::initAndStart(const Json::Value &config) {
             config["redis"]["port"].isUInt() &&
             config["redis"]["db"].isInt() &&
             config["redis"]["timeout"].isUInt() &&
-            config["redis"]["expirations"]["refresh"].isInt64() &&
-            config["redis"]["expirations"]["access"].isInt64() &&
-            config["redis"]["expirations"]["email"].isInt64()
+            config["redis"]["expirations"]["refresh"].isInt() &&
+            config["redis"]["expirations"]["access"].isInt() &&
+            config["redis"]["expirations"]["email"].isInt() &&
+            config["redis"]["expirations"]["phone"].isInt()
     )) {
         LOG_ERROR << R"("Invalid redis config")";
         abort();
@@ -69,7 +75,8 @@ void UserManager::initAndStart(const Json::Value &config) {
             {
                     chrono::minutes(config["redis"]["expirations"]["refresh"].asInt64()),
                     chrono::minutes(config["redis"]["expirations"]["access"].asInt64()),
-                    chrono::minutes(config["redis"]["expirations"]["email"].asInt64())
+                    chrono::minutes(config["redis"]["expirations"]["email"].asInt64()),
+                    chrono::minutes(config["redis"]["expirations"]["phone"].asInt64())
             }
     )));
 
@@ -85,7 +92,7 @@ void UserManager::initAndStart(const Json::Value &config) {
         abort();
     }
 
-    _usersMapper = make_unique<orm::Mapper<Mnemosyne::Users>>(app().getDbClient());
+    _usersMapper = make_unique <orm::Mapper<Mnemosyne::Users>> (app().getDbClient());
 
     LOG_INFO << "UserManager loaded.";
 }
@@ -138,6 +145,16 @@ void UserManager::verifyEmail(const string &email) {
     );
 }
 
+void UserManager::verifyPhone(const string &phone) {
+    auto code = data::randomString(8);
+    _userRedis->setPhoneCode(phone, code);
+    throw ResponseException(
+            i18n("notImplemented"),
+            ResultCode::internalError,
+            k501NotImplemented
+    );
+}
+
 tuple<RedisToken, bool> UserManager::loginEmailCode(
         const string &email,
         const string &code
@@ -162,7 +179,35 @@ tuple<RedisToken, bool> UserManager::loginEmailCode(
 
     return {
             _userRedis->generateTokens(to_string(user.getValueOfId())),
-            user.getValueOfIsNew()
+            user.getPassword() == nullptr
+    };
+}
+
+tuple<RedisToken, bool> UserManager::loginPhoneCode(
+        const string &phone,
+        const string &code
+) {
+    _checkPhoneCode(phone, code);
+
+    Mnemosyne::Users user;
+    if (_usersMapper->count(orm::Criteria(
+            Mnemosyne::Users::Cols::_phone,
+            orm::CompareOperator::EQ,
+            phone
+    )) == 0) {
+        user.setPhone(phone);
+        _usersMapper->insert(user);
+    } else {
+        user = _usersMapper->findOne(orm::Criteria(
+                Mnemosyne::Users::Cols::_phone,
+                orm::CompareOperator::EQ,
+                phone
+        ));
+    }
+
+    return {
+            _userRedis->generateTokens(to_string(user.getValueOfId())),
+            user.getPassword() == nullptr
     };
 }
 
@@ -175,6 +220,37 @@ RedisToken UserManager::loginEmailPassword(
                 Mnemosyne::Users::Cols::_email,
                 orm::CompareOperator::EQ,
                 email
+        ) && orm::Criteria(
+                Mnemosyne::Users::Cols::_password,
+                orm::CompareOperator::EQ,
+                password
+        ));
+
+        if (user.getValueOfPassword().empty()) {
+            throw ResponseException(
+                    i18n("noPassword"),
+                    ResultCode::nullValue,
+                    k403Forbidden
+            );
+        }
+
+        return _userRedis->generateTokens(to_string(user.getValueOfId()));
+    } catch (const orm::UnexpectedRows &e) {
+        LOG_DEBUG << "Unexpected rows: " << e.what();
+        throw ResponseException(
+                i18n("invalidEmailPass"),
+                ResultCode::notAcceptable,
+                k403Forbidden
+        );
+    }
+}
+
+RedisToken UserManager::loginPhonePassword(const string &phone, const string &password) {
+    try {
+        auto user = _usersMapper->findOne(orm::Criteria(
+                Mnemosyne::Users::Cols::_phone,
+                orm::CompareOperator::EQ,
+                phone
         ) && orm::Criteria(
                 Mnemosyne::Users::Cols::_password,
                 orm::CompareOperator::EQ,
@@ -214,9 +290,31 @@ void UserManager::resetEmail(
                 email
         ));
         user.setPassword(newPassword);
-        if (user.getValueOfIsNew()) {
-            user.setIsNew(false);
-        }
+        _usersMapper->update(user);
+    } catch (const orm::UnexpectedRows &e) {
+        LOG_DEBUG << "Unexpected rows: " << e.what();
+        throw ResponseException(
+                i18n("userNotFound"),
+                ResultCode::notFound,
+                k404NotFound
+        );
+    }
+}
+
+void UserManager::resetPhone(
+        const string &phone,
+        const string &code,
+        const string &newPassword
+) {
+    _checkPhoneCode(phone, code);
+
+    try {
+        auto user = _usersMapper->findOne(orm::Criteria(
+                Mnemosyne::Users::Cols::_phone,
+                orm::CompareOperator::EQ,
+                phone
+        ));
+        user.setPassword(newPassword);
         _usersMapper->update(user);
     } catch (const orm::UnexpectedRows &e) {
         LOG_DEBUG << "Unexpected rows: " << e.what();
@@ -274,10 +372,53 @@ void UserManager::migrateEmail(
     }
 }
 
-void UserManager::deactivateEmail(
+void UserManager::migratePhone(
         const string &accessToken,
+        const string &newPhone,
         const string &code
 ) {
+    _checkPhoneCode(newPhone, code);
+
+    try {
+        auto user = _usersMapper->findOne(orm::Criteria(
+                Mnemosyne::Users::Cols::_id,
+                orm::CompareOperator::EQ,
+                _userRedis->getIdByAccessToken(accessToken)
+        ));
+        if (user.getValueOfPhone() == newPhone) {
+            return;
+        }
+        if (_usersMapper->count(orm::Criteria(
+                Mnemosyne::Users::Cols::_phone,
+                orm::CompareOperator::EQ,
+                newPhone
+        ))) {
+            throw ResponseException(
+                    i18n("emailExists"),
+                    ResultCode::conflict,
+                    k409Conflict
+            );
+        }
+        user.setPhone(newPhone);
+        _usersMapper->update(user);
+    } catch (const redis_exception::KeyNotFound &e) {
+        LOG_DEBUG << "Key not found:" << e.what();
+        throw ResponseException(
+                i18n("invalidAccessToken"),
+                ResultCode::notAcceptable,
+                k401Unauthorized
+        );
+    } catch (const orm::UnexpectedRows &e) {
+        LOG_DEBUG << "Unexpected rows: " << e.what();
+        throw ResponseException(
+                i18n("userNotFound"),
+                ResultCode::notFound,
+                k404NotFound
+        );
+    }
+}
+
+void UserManager::deactivateEmail(const string &accessToken, const string &code) {
     try {
         auto user = _usersMapper->findOne(orm::Criteria(
                 Mnemosyne::Users::Cols::_id,
@@ -304,14 +445,16 @@ void UserManager::deactivateEmail(
     }
 }
 
-Json::Value UserManager::getUserInfo(
-        const string &accessToken,
-        const int64_t &userId
-) {
-    int64_t targetId;
+void UserManager::deactivatePhone(const string &accessToken, const string &code) {
     try {
-        auto tempUserId = _userRedis->getIdByAccessToken(accessToken);
-        targetId = userId < 0 ? tempUserId : userId;
+        auto user = _usersMapper->findOne(orm::Criteria(
+                Mnemosyne::Users::Cols::_id,
+                orm::CompareOperator::EQ,
+                _userRedis->getIdByAccessToken(accessToken)
+        ));
+        _checkPhoneCode(user.getValueOfPhone(), code);
+
+        _usersMapper->deleteOne(user);
     } catch (const redis_exception::KeyNotFound &e) {
         LOG_DEBUG << "Key not found:" << e.what();
         throw ResponseException(
@@ -319,17 +462,33 @@ Json::Value UserManager::getUserInfo(
                 ResultCode::notAcceptable,
                 k401Unauthorized
         );
+    } catch (const orm::UnexpectedRows &e) {
+        LOG_DEBUG << "Unexpected rows: " << e.what();
+        throw ResponseException(
+                i18n("userNotFound"),
+                ResultCode::notFound,
+                k404NotFound
+        );
     }
+}
+
+Json::Value UserManager::getUserInfo(const string &accessToken, int64_t userId) {
+    int64_t targetId = userId;
+    NO_EXCEPTION(
+            targetId = _userRedis->getIdByAccessToken(accessToken);
+    )
     try {
         auto user = _usersMapper->findOne(orm::Criteria(
                 Mnemosyne::Users::Cols::_id,
                 orm::CompareOperator::EQ,
                 targetId
         )).toJson();
-        user.removeMember("phone");
         user.removeMember("password");
         user.removeMember("avatar");
-        user.removeMember("is_new");
+        if (userId > 0) {
+            user.removeMember("email");
+            user.removeMember("phone");
+        }
         return user;
     } catch (const orm::UnexpectedRows &e) {
         LOG_DEBUG << "Unexpected rows: " << e.what();
@@ -341,17 +500,14 @@ Json::Value UserManager::getUserInfo(
     }
 }
 
-void UserManager::updateUserInfo(
-        const string &accessToken,
-        RequestJson request
-) {
+void UserManager::updateUserInfo(const string &accessToken, RequestJson request) {
     try {
         auto user = _usersMapper->findOne(orm::Criteria(
                 Mnemosyne::Users::Cols::_id,
                 orm::CompareOperator::EQ,
-                _userRedis->getIdByAccessToken(accessToken)
+                getUserId(accessToken)
         ));
-        if (user.getValueOfIsNew()) {
+        if (user.getValueOfPassword().empty()) {
             if (!request.check("password", JsonValue::String)) {
                 throw ResponseException(
                         i18n("noPassword"),
@@ -359,7 +515,6 @@ void UserManager::updateUserInfo(
                         k403Forbidden
                 );
             }
-            user.setIsNew(false);
         } else {
             request.remove("password");
         }
@@ -378,22 +533,11 @@ void UserManager::updateUserInfo(
     }
 }
 
-string UserManager::getAvatar(
-        const string &accessToken,
-        const int64_t &userId
-) {
-    int64_t targetId;
-    try {
-        auto tempUserId = _userRedis->getIdByAccessToken(accessToken);
-        targetId = userId < 0 ? tempUserId : userId;
-    } catch (const redis_exception::KeyNotFound &e) {
-        LOG_DEBUG << "Key not found:" << e.what();
-        throw ResponseException(
-                i18n("invalidAccessToken"),
-                ResultCode::notAcceptable,
-                k401Unauthorized
-        );
-    }
+string UserManager::getAvatar(const string &accessToken, int64_t userId) {
+    int64_t targetId = userId;
+    NO_EXCEPTION(
+            targetId = _userRedis->getIdByAccessToken(accessToken);
+    )
     try {
         auto user = _usersMapper->findOne(orm::Criteria(
                 Mnemosyne::Users::Cols::_id,
@@ -409,6 +553,51 @@ string UserManager::getAvatar(
                 k404NotFound
         );
     }
+}
+
+Json::Value UserManager::getFollows(const string &accessToken, int64_t userId) {
+    int64_t targetId = userId;
+    NO_EXCEPTION(
+            targetId = _userRedis->getIdByAccessToken(accessToken);
+    )
+    try {
+        return _userRedis->getFollows(to_string(targetId));
+    } catch (const redis_exception::KeyNotFound &e) {
+        LOG_DEBUG << "Key not found:" << e.what();
+        throw ResponseException(
+                i18n("userNotFound"),
+                ResultCode::notFound,
+                k404NotFound
+        );
+    }
+}
+
+bool UserManager::follow(const string &accessToken, int64_t followId) {
+    return _userRedis->follow(
+            to_string(getUserId(accessToken)),
+            to_string(followId)
+    );
+}
+
+Json::Value UserManager::getStarred(const string &accessToken, int64_t userId) {
+    int64_t targetId = userId;
+    NO_EXCEPTION(
+            targetId = _userRedis->getIdByAccessToken(accessToken);
+    )
+    try {
+        return _userRedis->getStarred(to_string(targetId));
+    } catch (const redis_exception::KeyNotFound &e) {
+        LOG_DEBUG << "Key not found:" << e.what();
+        throw ResponseException(
+                i18n("userNotFound"),
+                ResultCode::notFound,
+                k404NotFound
+        );
+    }
+}
+
+void UserManager::dataStar(int64_t userId, int64_t dataId) const {
+    _userRedis->dataStar(to_string(userId), to_string(dataId));
 }
 
 bool UserManager::ipLimit(const string &ip) const {
@@ -427,12 +616,23 @@ bool UserManager::emailLimit(const string &email) const {
     );
 }
 
-void UserManager::_checkEmailCode(
-        const string &email,
-        const string &code
-) {
+bool UserManager::phoneLimit(const string &phone) const {
+    return _userRedis->tokenBucket(
+            "phone:" + phone,
+            _phoneInterval,
+            _phoneMaxCount
+    );
+}
+
+void UserManager::_checkEmailCode(const string &email, const string &code) {
     try {
-        _userRedis->checkEmailCode(email, code);
+        if (!_userRedis->checkEmailCode(email, code)) {
+            throw ResponseException(
+                    i18n("invalidCode"),
+                    ResultCode::notAcceptable,
+                    k403Forbidden
+            );
+        }
         _userRedis->deleteEmailCode(email);
     } catch (const redis_exception::KeyNotFound &e) {
         LOG_DEBUG << "Key not found: " << e.what();
@@ -441,12 +641,25 @@ void UserManager::_checkEmailCode(
                 ResultCode::notFound,
                 k404NotFound
         );
-    } catch (const redis_exception::NotEqual &e) {
-        LOG_DEBUG << "Value not equal at: " << e.what();
+    }
+}
+
+void UserManager::_checkPhoneCode(const string &phone, const string &code) {
+    try {
+        if (!_userRedis->checkPhoneCode(phone, code)) {
+            throw ResponseException(
+                    i18n("invalidCode"),
+                    ResultCode::notAcceptable,
+                    k403Forbidden
+            );
+        }
+        _userRedis->deletePhoneCode(phone);
+    } catch (const redis_exception::KeyNotFound &e) {
+        LOG_DEBUG << "Key not found: " << e.what();
         throw ResponseException(
-                i18n("invalidCode"),
-                ResultCode::notAcceptable,
-                k403Forbidden
+                i18n("invalidEmail"),
+                ResultCode::notFound,
+                k404NotFound
         );
     }
 }

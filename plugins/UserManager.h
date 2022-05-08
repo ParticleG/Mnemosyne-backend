@@ -29,8 +29,15 @@ namespace mnemosyne::plugins {
 
         void verifyEmail(const std::string &email);
 
+        void verifyPhone(const std::string &phone);
+
         [[nodiscard]] std::tuple<structures::RedisToken, bool> loginEmailCode(
                 const std::string &email,
+                const std::string &code
+        );
+
+        [[nodiscard]] std::tuple<structures::RedisToken, bool> loginPhoneCode(
+                const std::string &phone,
                 const std::string &code
         );
 
@@ -39,8 +46,19 @@ namespace mnemosyne::plugins {
                 const std::string &password
         );
 
+        [[nodiscard]] structures::RedisToken loginPhonePassword(
+                const std::string &phone,
+                const std::string &password
+        );
+
         void resetEmail(
                 const std::string &email,
+                const std::string &code,
+                const std::string &newPassword
+        );
+
+        void resetPhone(
+                const std::string &phone,
                 const std::string &code,
                 const std::string &newPassword
         );
@@ -51,42 +69,47 @@ namespace mnemosyne::plugins {
                 const std::string &code
         );
 
-        void deactivateEmail(
+        void migratePhone(
                 const std::string &accessToken,
+                const std::string &newPhone,
                 const std::string &code
         );
 
-        [[nodiscard]] Json::Value getUserInfo(
-                const std::string &accessToken,
-                const int64_t &userId
-        );
+        void deactivateEmail(const std::string &accessToken, const std::string &code);
 
-        void updateUserInfo(
-                const std::string &accessToken,
-                helpers::RequestJson request
-        );
+        void deactivatePhone(const std::string &accessToken, const std::string &code);
 
-        [[nodiscard]] std::string getAvatar(
-                const std::string &accessToken,
-                const int64_t &userId
-        );
+        [[nodiscard]] Json::Value getUserInfo(const std::string &accessToken, int64_t userId);
+
+        void updateUserInfo(const std::string &accessToken, helpers::RequestJson request);
+
+        [[nodiscard]] std::string getAvatar(const std::string &accessToken, int64_t userId);
+
+        Json::Value getFollows(const std::string &accessToken, int64_t userId);
+
+        bool follow(const std::string &accessToken, int64_t followId);
+
+        Json::Value getStarred(const std::string &accessToken, int64_t userId);
+
+        void dataStar(int64_t userId, int64_t dataId) const;
 
         [[nodiscard]] bool ipLimit(const std::string &ip) const;
 
         [[nodiscard]] bool emailLimit(const std::string &email) const;
 
+        [[nodiscard]] bool phoneLimit(const std::string &phone) const;
+
     private:
-        std::chrono::seconds _ipInterval{}, _emailInterval{};
-        uint64_t _ipMaxCount{}, _emailMaxCount{};
+        std::chrono::seconds _ipInterval{}, _emailInterval{}, _phoneInterval{};
+        uint64_t _ipMaxCount{}, _emailMaxCount{}, _phoneMaxCount{};
 
         std::unique_ptr<helpers::EmailHelper> _emailHelper;
         std::unique_ptr<mnemosyne::structures::UserRedis> _userRedis;
         std::unique_ptr<drogon::orm::Mapper<drogon_model::Mnemosyne::Users>> _usersMapper;
 
-        void _checkEmailCode(
-                const std::string &email,
-                const std::string &code
-        );
+        void _checkEmailCode(const std::string &email, const std::string &code);
+
+        void _checkPhoneCode(const std::string &phone, const std::string &code);
     };
 }
 
