@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
 
-include(utils.cmake)
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -20,9 +18,8 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     message(STATUS "Compiler is Intel C++")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     message(STATUS "Compiler is Visual Studio C++")
-    get_WIN32_WINNT(WIN32_WINNT)
     add_compile_options(/MP /utf-8)
-    add_compile_definitions(_CRT_SECURE_NO_WARNINGS NOMINMAX _WIN32_WINNT=${WIN32_WINNT})
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS NOMINMAX)
 endif ()
 
 find_package(cryptopp CONFIG REQUIRED)
@@ -70,7 +67,7 @@ target_link_libraries(
 target_include_directories(
         ${PROJECT_NAME}
         PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 install(
@@ -91,4 +88,4 @@ install(
 
 # ##############################################################################
 
-add_subdirectory(test)
+#add_subdirectory(test)
