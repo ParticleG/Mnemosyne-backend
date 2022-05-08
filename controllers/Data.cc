@@ -41,7 +41,7 @@ Data::Data() :
 void Data::upload(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        _dataManager->uploadData(
+        _dataManager->dataUpload(
                 _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<RequestJson>("requestJson")
         );
@@ -52,7 +52,7 @@ void Data::upload(const HttpRequestPtr &req, function<void(const HttpResponsePtr
 void Data::fuzzy(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        response.setData(_dataManager->fuzzyData(
+        response.setData(_dataManager->dataFuzzy(
                 req->attributes()->get<RequestJson>("requestJson")
         ));
     }, response);
@@ -62,9 +62,20 @@ void Data::fuzzy(const HttpRequestPtr &req, function<void(const HttpResponsePtr 
 void Data::search(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        response.setData(_dataManager->searchData(
+        response.setData(_dataManager->dataSearch(
                 req->attributes()->get<RequestJson>("requestJson")
         ));
+    }, response);
+    response.httpCallback(callback);
+}
+
+void Data::star(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        _dataManager->dataStar(
+                _userManager->getUserId(req->attributes()->get<string>("accessToken")),
+                req->attributes()->get<int64_t>("dataId")
+        );
     }, response);
     response.httpCallback(callback);
 }
@@ -72,7 +83,7 @@ void Data::search(const HttpRequestPtr &req, function<void(const HttpResponsePtr
 void Data::modify(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        _dataManager->modifyData(
+        _dataManager->dataModify(
                 _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<RequestJson>("requestJson")
         );
@@ -83,9 +94,9 @@ void Data::modify(const HttpRequestPtr &req, function<void(const HttpResponsePtr
 void Data::remove(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        _dataManager->deleteData(
+        _dataManager->dataDelete(
                 _userManager->getUserId(req->attributes()->get<string>("accessToken")),
-                req->attributes()->get<RequestJson>("requestJson")
+                req->attributes()->get<int64_t>("dataId")
         );
     }, response);
     response.httpCallback(callback);

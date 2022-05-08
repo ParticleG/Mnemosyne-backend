@@ -41,16 +41,36 @@ namespace mnemosyne::api::v1 {
                     "mnemosyne::filters::IpThreshold"
             );
             METHOD_ADD(
+                    Auth::verifyPhone,
+                    "/verify/phone",
+                    drogon::Post,
+                    "mnemosyne::filters::AuthVerifyPhone",
+                    "mnemosyne::filters::PhoneThreshold",
+                    "mnemosyne::filters::IpThreshold"
+            );
+            METHOD_ADD(
                     Auth::loginEmail,
                     "/login/email",
                     drogon::Post,
                     "mnemosyne::filters::AuthLoginEmail"
             );
             METHOD_ADD(
+                    Auth::loginPhone,
+                    "/login/phone",
+                    drogon::Post,
+                    "mnemosyne::filters::AuthLoginPhone"
+            );
+            METHOD_ADD(
                     Auth::resetEmail,
                     "/reset/email",
                     drogon::Put,
                     "mnemosyne::filters::AuthResetEmail"
+            );
+            METHOD_ADD(
+                    Auth::resetPhone,
+                    "/reset/phone",
+                    drogon::Put,
+                    "mnemosyne::filters::AuthResetPhone"
             );
             METHOD_ADD(
                     Auth::migrateEmail,
@@ -60,11 +80,25 @@ namespace mnemosyne::api::v1 {
                     "mnemosyne::filters::AuthMigrateEmail"
             );
             METHOD_ADD(
+                    Auth::migratePhone,
+                    "/migrate/phone",
+                    drogon::Put,
+                    "mnemosyne::filters::CheckAccessToken",
+                    "mnemosyne::filters::AuthMigratePhone"
+            );
+            METHOD_ADD(
                     Auth::deactivateEmail,
                     "/deactivate/email",
                     drogon::Delete,
                     "mnemosyne::filters::CheckAccessToken",
                     "mnemosyne::filters::AuthDeactivateEmail"
+            );
+            METHOD_ADD(
+                    Auth::deactivatePhone,
+                    "/deactivate/phone",
+                    drogon::Delete,
+                    "mnemosyne::filters::CheckAccessToken",
+                    "mnemosyne::filters::AuthDeactivatePhone"
             );
         METHOD_LIST_END
 
@@ -74,13 +108,23 @@ namespace mnemosyne::api::v1 {
 
         void verifyEmail(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
+        void verifyPhone(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
+
         void loginEmail(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
+
+        void loginPhone(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
         void resetEmail(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
+        void resetPhone(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
+
         void migrateEmail(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
+        void migratePhone(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
+
         void deactivateEmail(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
+
+        void deactivatePhone(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
     private:
         plugins::UserManager *_userManager;

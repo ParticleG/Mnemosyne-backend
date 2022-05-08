@@ -68,6 +68,16 @@ void Auth::verifyEmail(const HttpRequestPtr &req, function<void(const HttpRespon
     response.httpCallback(callback);
 }
 
+void Auth::verifyPhone(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        _userManager->verifyPhone(
+                req->attributes()->get<RequestJson>("requestJson")["phone"].asString()
+        );
+    }, response);
+    response.httpCallback(callback);
+}
+
 void Auth::loginEmail(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
@@ -90,12 +100,47 @@ void Auth::loginEmail(const HttpRequestPtr &req, function<void(const HttpRespons
     response.httpCallback(callback);
 }
 
+void Auth::loginPhone(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        auto request = req->attributes()->get<RequestJson>("requestJson");
+        if (request.check("code", JsonValue::String)) {
+            const auto &[tokens, isNew] = _userManager->loginPhoneCode(
+                    request["phone"].asString(),
+                    request["code"].asString()
+            );
+            if (isNew) { response.setResultCode(ResultCode::continued); }
+            response.setData(move(tokens.parse()));
+        } else {
+            const auto &tokens = _userManager->loginPhonePassword(
+                    request["phone"].asString(),
+                    request["password"].asString()
+            );
+            response.setData(move(tokens.parse()));
+        }
+    }, response);
+    response.httpCallback(callback);
+}
+
 void Auth::resetEmail(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
         auto request = req->attributes()->get<RequestJson>("requestJson");
         _userManager->resetEmail(
                 request["email"].asString(),
+                request["code"].asString(),
+                request["newPassword"].asString()
+        );
+    }, response);
+    response.httpCallback(callback);
+}
+
+void Auth::resetPhone(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        auto request = req->attributes()->get<RequestJson>("requestJson");
+        _userManager->resetPhone(
+                request["phone"].asString(),
                 request["code"].asString(),
                 request["newPassword"].asString()
         );
@@ -116,11 +161,36 @@ void Auth::migrateEmail(const HttpRequestPtr &req, function<void(const HttpRespo
     response.httpCallback(callback);
 }
 
+void Auth::migratePhone(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        auto request = req->attributes()->get<RequestJson>("requestJson");
+        _userManager->migratePhone(
+                req->attributes()->get<string>("accessToken"),
+                request["newPhone"].asString(),
+                request["code"].asString()
+        );
+    }, response);
+    response.httpCallback(callback);
+}
+
 void Auth::deactivateEmail(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
         auto request = req->attributes()->get<RequestJson>("requestJson");
         _userManager->deactivateEmail(
+                req->attributes()->get<string>("accessToken"),
+                request["code"].asString()
+        );
+    }, response);
+    response.httpCallback(callback);
+}
+
+void Auth::deactivatePhone(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        auto request = req->attributes()->get<RequestJson>("requestJson");
+        _userManager->deactivatePhone(
                 req->attributes()->get<string>("accessToken"),
                 request["code"].asString()
         );

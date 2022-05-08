@@ -33,7 +33,6 @@ namespace mnemosyne::api::v1 {
                     Data::fuzzy,
                     "/fuzzy",
                     drogon::Post,
-                    "mnemosyne::filters::CheckAccessToken",
                     "mnemosyne::filters::CheckDataType",
                     "mnemosyne::filters::DataFuzzy",
             );
@@ -41,9 +40,15 @@ namespace mnemosyne::api::v1 {
                     Data::search,
                     "/search",
                     drogon::Post,
-                    "mnemosyne::filters::CheckAccessToken",
                     "mnemosyne::filters::CheckDataType",
                     "mnemosyne::filters::DataSearch",
+            );
+            METHOD_ADD(
+                    Data::star,
+                    "/star",
+                    drogon::Post,
+                    "mnemosyne::filters::CheckAccessToken",
+                    "mnemosyne::filters::CheckDataId",
             );
             METHOD_ADD(
                     Data::modify,
@@ -57,7 +62,7 @@ namespace mnemosyne::api::v1 {
                     "/remove",
                     drogon::Post,
                     "mnemosyne::filters::CheckAccessToken",
-                    "mnemosyne::filters::DataRemove",
+                    "mnemosyne::filters::CheckDataId",
             );
         METHOD_LIST_END
 
@@ -66,6 +71,8 @@ namespace mnemosyne::api::v1 {
         void fuzzy(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
         void search(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
+
+        void star(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
         void modify(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 

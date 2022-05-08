@@ -10,8 +10,13 @@
 /**
  * @brief This filter trims "Data::search" request body
  * @param name: String
+ * @param description: String
  * @param tags: Array
  * @param extra: String
+ * @param creator: Int64
+ * @param fromTime: timestamp
+ * @param endTime: timestamp
+ * @param page: UInt64
  * @return requestJson: in request attributes
  */
 namespace mnemosyne::filters {

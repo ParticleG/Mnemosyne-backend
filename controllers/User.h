@@ -39,23 +39,42 @@ namespace mnemosyne::api::v1 {
                     "/avatar",
                     drogon::Get,
                     "mnemosyne::filters::CheckAccessToken",
-                    "mnemosyne::filters::CheckUserId");
+                    "mnemosyne::filters::CheckUserId"
+            );
+            METHOD_ADD(
+                    User::getFollows,
+                    "/follow",
+                    drogon::Get,
+                    "mnemosyne::filters::CheckAccessToken",
+                    "mnemosyne::filters::CheckUserId"
+            );
+            METHOD_ADD(
+                    User::follow,
+                    "/follow",
+                    drogon::Post,
+                    "mnemosyne::filters::CheckAccessToken",
+                    "mnemosyne::filters::CheckUserId"
+            );
+            METHOD_ADD(
+                    User::starred,
+                    "/starred",
+                    drogon::Get,
+                    "mnemosyne::filters::CheckAccessToken",
+                    "mnemosyne::filters::CheckUserId"
+            );
         METHOD_LIST_END
 
-        void getInfo(
-                const drogon::HttpRequestPtr &req,
-                std::function<void(const drogon::HttpResponsePtr &)> &&callback
-        );
+        void getInfo(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
-        void updateInfo(
-                const drogon::HttpRequestPtr &req,
-                std::function<void(const drogon::HttpResponsePtr &)> &&callback
-        );
+        void updateInfo(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
-        void getAvatar(
-                const drogon::HttpRequestPtr &req,
-                std::function<void(const drogon::HttpResponsePtr &)> &&callback
-        );
+        void getAvatar(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
+
+        void getFollows(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
+
+        void follow(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
+
+        void starred(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
     private:
         mnemosyne::plugins::UserManager *_userManager;

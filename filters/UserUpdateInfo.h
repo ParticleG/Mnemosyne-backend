@@ -14,8 +14,6 @@
  * @param motto: String
  * @param region: Int64
  * @param avatar: String
- * @param avatar_frame: Int64
- * @param clan: String
  * @return requestJson: in request attributes
  */
 namespace mnemosyne::filters {

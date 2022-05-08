@@ -3,7 +3,6 @@
 //
 
 #include <filters/CheckDataType.h>
-#include <helpers/ResponseJson.h>
 #include <magic_enum.hpp>
 #include <types/DataType.h>
 
@@ -22,12 +21,8 @@ void CheckDataType::doFilter(
     const auto &dataType = req->getParameter("dataType");
     if (enum_cast<DataType>(dataType).has_value()) {
         req->attributes()->insert("dataType", dataType);
-        nextCb();
     } else {
-        ResponseJson response;
-        response.setStatusCode(k406NotAcceptable);
-        response.setResultCode(ResultCode::notAcceptable);
-        response.setMessage(i18n("invalidNodeType"));
-        response.httpCallback(failedCb);
+        req->attributes()->insert("dataType", string(enum_name(DataType::Any)));
     }
+    nextCb();
 }

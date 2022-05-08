@@ -68,3 +68,36 @@ void User::getAvatar(const HttpRequestPtr &req, function<void(const HttpResponse
     }, response);
     response.httpCallback(callback);
 }
+
+void User::getFollows(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        response.setData(_userManager->getFollows(
+                req->attributes()->get<string>("accessToken"),
+                req->attributes()->get<int64_t>("userId")
+        ));
+    }, response);
+    response.httpCallback(callback);
+}
+
+void User::follow(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        _userManager->follow(
+                req->attributes()->get<string>("accessToken"),
+                req->attributes()->get<int64_t>("userId")
+        );
+    }, response);
+    response.httpCallback(callback);
+}
+
+void User::starred(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        _userManager->getStarred(
+                req->attributes()->get<string>("accessToken"),
+                req->attributes()->get<int64_t>("userId")
+        );
+    }, response);
+    response.httpCallback(callback);
+}

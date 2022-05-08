@@ -10,11 +10,13 @@
 /**
  * @brief This filter checks "Data::upload" request body
  * @param name: String
+ * @param description: String
  * @param tags: Array
- * @param collection: Int64
  * @param content: String
- * @param visibility: Int
  * @param extra: String
+ * @param preview: String
+ * @param collection: Int64
+ * @param visibility: Int
  * @return requestJson: in request attributes
  */
 namespace mnemosyne::filters {

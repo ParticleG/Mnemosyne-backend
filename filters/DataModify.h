@@ -11,9 +11,13 @@
  * @brief This filter checks "Data::modify" request body
  * @param id: Int64
  * @param name: String
- * @param tags: String
- * @param collection: Int64
+ * @param description: String
+ * @param tags: Array
  * @param content: String
+ * @param extra: String
+ * @param preview: String
+ * @param collection: Int64
+ * @param visibility: Int
  * @return requestJson: in request attributes
  */
 namespace mnemosyne::filters {

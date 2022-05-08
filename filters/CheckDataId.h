@@ -5,24 +5,21 @@
 #pragma once
 
 #include <drogon/HttpFilter.h>
-#include <structures/ExceptionHandlers.h>
+#include <helpers/I18nHelper.h>
 
 /**
- * @brief This filter trims "Data::fuzzy" request body
- * @param query: String
- * @param fromTime: timestamp
- * @param endTime: timestamp
- * @param page: UInt64
- * @return requestJson: in request attributes
+ * @brief This filter checks param "dataId" and set attribute "dataId"
+ * @param dataId: in query string
+ * @return dataId: Int64
  */
+
 namespace mnemosyne::filters {
-    class DataFuzzy :
-            public drogon::HttpFilter<DataFuzzy>,
-            public structures::RequestJsonHandler<DataFuzzy> {
+    class CheckDataId :
+            public drogon::HttpFilter<CheckDataId>,
+            public helpers::I18nHelper<CheckDataId> {
     public:
         static constexpr char projectName[] = CMAKE_PROJECT_NAME;
 
-    public:
         void doFilter(
                 const drogon::HttpRequestPtr &req,
                 drogon::FilterCallback &&failedCb,

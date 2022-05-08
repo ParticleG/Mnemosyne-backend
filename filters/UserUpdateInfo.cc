@@ -19,16 +19,15 @@ void UserUpdateInfo::doFilter(
     handleExceptions([&]() {
         auto request = RequestJson(req);
         request.remove("id");
-        request.remove("email");
+        request.remove("permission");
         request.remove("avatar_hash");
-        request.remove("is_new");
+        request.remove("email");
+        request.remove("phone");
         request.trim("password", JsonValue::String);
         request.trim("username", JsonValue::String);
         request.trim("motto", JsonValue::String);
         request.trim("region", JsonValue::Int64);
         request.trim("avatar", JsonValue::String);
-        request.trim("avatar_frame", JsonValue::Int64);
-        request.trim("clan", JsonValue::String);
         req->attributes()->insert("requestJson", request);
         nextCb();
     }, failedCb);
