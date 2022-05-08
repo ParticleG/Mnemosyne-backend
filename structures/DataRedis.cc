@@ -8,45 +8,14 @@ using namespace drogon;
 using namespace std;
 using namespace cpp_redis;
 using namespace mnemosyne::structures;
-
-// TODO: Make some Redis actions run in pipeline
+using namespace mnemosyne::types;
 
 DataRedis::DataRedis() : RedisHelper("data") {}
 
-void DataRedis::uploadData(
-        int64_t userId,
-        int64_t dataId,
-        const Json::Value &tags
-) {
+bool DataRedis::dataStar(int64_t userId, int64_t dataId) {
     setAdd(
-            "data:posts:" + to_string(userId),
-            {to_string(dataId)}
+            "data:starred" + to_string(dataId),
+            {to_string(userId)}
     );
-    for (const auto &tag: tags) {
-        if (tag.isString()) {
-            setAdd(
-                    "data:tags:" + tag.asString(),
-                    {to_string(dataId)}
-            );
-        }
-    }
-}
-
-void DataRedis::deleteData(
-        int64_t userId,
-        int64_t dataId,
-        const Json::Value &tags
-) {
-    setRemove(
-            "data:posts:" + to_string(userId),
-            {to_string(dataId)}
-    );
-    for (const auto &tag: tags) {
-        if (tag.isString()) {
-            setRemove(
-                    "data:tags:" + tag.asString(),
-                    {to_string(dataId)}
-            );
-        }
-    }
+    return false;
 }
