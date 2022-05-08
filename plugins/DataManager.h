@@ -9,7 +9,6 @@
 #include <helpers/I18nHelper.h>
 #include <helpers/RequestJson.h>
 #include <models/Data.h>
-#include <models/Users.h>
 #include <structures/DataRedis.h>
 #include <types/DataType.h>
 
@@ -25,20 +24,21 @@ namespace mnemosyne::plugins {
 
         void shutdown() override;
 
-        void uploadData(int64_t userId, const helpers::RequestJson &requestJson);
+        void dataUpload(int64_t userId, const helpers::RequestJson &requestJson);
 
-        Json::Value fuzzyData(const helpers::RequestJson &requestJson);
+        Json::Value dataFuzzy(const helpers::RequestJson &requestJson);
 
-        Json::Value searchData(const helpers::RequestJson &requestJson);
+        Json::Value dataSearch(const helpers::RequestJson &requestJson);
 
-        void modifyData(int64_t userId, const helpers::RequestJson &requestJson);
+        bool dataStar(int64_t userId, int64_t dataId);
 
-        void deleteData(int64_t userId, const helpers::RequestJson &requestJson);
+        void dataModify(int64_t userId, const helpers::RequestJson &requestJson);
+
+        void dataDelete(int64_t userId, int64_t dataId);
 
     private:
         std::unique_ptr<mnemosyne::structures::DataRedis> _dataRedis;
         std::unique_ptr<drogon::orm::Mapper<drogon_model::Mnemosyne::Data>> _dataMapper;
-        std::unique_ptr<drogon::orm::Mapper<drogon_model::Mnemosyne::Users>> _usersMapper;
     };
 }
 
