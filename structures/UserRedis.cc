@@ -18,12 +18,10 @@ UserRedis::UserRedis(Expiration expiration) : RedisHelper("user"), _expiration(e
 UserRedis::UserRedis(UserRedis &&redis) noexcept: RedisHelper("user"), _expiration(redis._expiration) {}
 
 RedisToken UserRedis::refresh(const string &refreshToken) {
-    _extendRefreshToken(refreshToken);
+    expire("auth:refresh:" + refreshToken, _expiration.refresh);
     return {
             refreshToken,
-            _generateAccessToken(
-                    get("user:auth:refresh:" + refreshToken)
-            )
+            _generateAccessToken(get("auth:refresh:" + refreshToken))
     };
 }
 
@@ -34,43 +32,90 @@ RedisToken UserRedis::generateTokens(const string &userId) {
     };
 }
 
-void UserRedis::checkEmailCode(
-        const string &email,
-        const string &code
-) {
-    compare("user:auth:code:email:" + email, code);
+bool UserRedis::checkEmailCode(const string &email, const string &code) {
+    return get("auth:code:email:" + email) == code;
+}
+
+bool UserRedis::checkPhoneCode(const string &phone, const string &code) {
+    return get("auth:code:phone:" + phone) == code;
 }
 
 void UserRedis::deleteEmailCode(const string &email) {
-    del("user:auth:code:email:" + email);
+    del("auth:code:email:" + email);
 }
 
-void UserRedis::setEmailCode(
-        const string &email,
-        const string &code
-) {
+void UserRedis::deletePhoneCode(const string &phone) {
+    del("auth:code:phone:" + phone);
+}
+
+void UserRedis::setEmailCode(const string &email, const string &code) {
     setEx(
-            "user:auth:code:email:" + email,
+            "auth:code:email:" + email,
             _expiration.getEmailSeconds(),
             code
     );
 }
 
-int64_t UserRedis::getIdByAccessToken(const string &accessToken) {
-    return stoll(get("user:auth:access:" + accessToken));
+void UserRedis::setPhoneCode(const string &phone, const string &code) {
+    setEx(
+            "auth:code:phone:" + phone,
+            _expiration.getPhoneSeconds(),
+            code
+    );
 }
 
-void UserRedis::_extendRefreshToken(const string &refreshToken) {
-    expire(
-            "user:auth:refresh:" + refreshToken,
-            _expiration.refresh
+int64_t UserRedis::getIdByAccessToken(const string &accessToken) {
+    return stoll(get("auth:access:" + accessToken));
+}
+
+Json::Value UserRedis::getFollows(const string &userId) {
+    Json::Value result;
+    const auto follows = setGetMembers(
+            {"user:following:" + userId,
+             "user:followers:" + userId}
     );
+    for (const auto &following: follows[0]) {
+        result["following"].append(stoll(following));
+    }
+    for (const auto &follower: follows[1]) {
+        result["followers"].append(stoll(follower));
+    }
+    return result;
+}
+
+bool UserRedis::follow(const string &userId, const string &followId) {
+    if (setIsMember("user:following:" + userId, followId)) {
+        setRemove({{"user:following:" + userId,   {followId}},
+                   {"user:followers:" + followId, {userId}}});
+        return false;
+    } else {
+        setAdd({{"user:following:" + userId,   {followId}},
+                {"user:followers:" + followId, {userId}}});
+        return true;
+    }
+}
+
+Json::Value UserRedis::getStarred(const string &userId) {
+    Json::Value result;
+    const auto starred = setGetMembers("user:starred:" + userId);
+    for (const auto &dataId: starred) {
+        result["following"].append(stoll(dataId));
+    }
+    return result;
+}
+
+void UserRedis::dataStar(const string &userId, const string &dataId) {
+    if (setIsMember("user:starred:" + userId, dataId)) {
+        setRemove("user:starred:" + userId, {dataId});
+    } else {
+        setAdd("user:starred:" + userId, {dataId});
+    }
 }
 
 string UserRedis::_generateRefreshToken(const string &userId) {
     auto refreshToken = crypto::keccak(drogon::utils::getUuid());
     setEx(
-            "user:auth:refresh:" + refreshToken,
+            "auth:refresh:" + refreshToken,
             _expiration.getRefreshSeconds(),
             userId
     );
@@ -79,15 +124,18 @@ string UserRedis::_generateRefreshToken(const string &userId) {
 
 string UserRedis::_generateAccessToken(const string &userId) {
     auto accessToken = crypto::blake2B(drogon::utils::getUuid());
-    setEx(
-            "user:auth:id:" + userId,
-            _expiration.getAccessSeconds(),
-            accessToken
-    );
-    setEx(
-            "user:auth:access:" + accessToken,
-            _expiration.getAccessSeconds(),
-            userId
-    );
+    setEx({{
+                   "auth:id:" + userId,
+                   _expiration.getAccessSeconds(),
+                   accessToken
+           },
+           {
+                   "auth:access:" + accessToken,
+                   _expiration.getAccessSeconds(),
+                   userId
+           }});
     return accessToken;
 }
+
+
+

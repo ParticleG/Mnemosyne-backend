@@ -24,7 +24,11 @@ namespace mnemosyne::structures {
                 return static_cast<int>(email.count());
             }
 
-            std::chrono::seconds refresh{}, access{}, email{};
+            [[nodiscard]] int getPhoneSeconds() const {
+                return static_cast<int>(phone.count());
+            }
+
+            std::chrono::seconds refresh{}, access{}, email{}, phone{};
         };
 
     public:
@@ -36,26 +40,30 @@ namespace mnemosyne::structures {
 
         [[nodiscard]] RedisToken generateTokens(const std::string &userId);
 
-        void checkEmailCode(
-                const std::string &email,
-                const std::string &code
-        );
+        bool checkEmailCode(const std::string &email, const std::string &code);
+
+        bool checkPhoneCode(const std::string &phone, const std::string &code);
 
         void deleteEmailCode(const std::string &email);
 
-        void setEmailCode(
-                const std::string &email,
-                const std::string &code
-        );
+        void deletePhoneCode(const std::string &phone);
+
+        void setEmailCode(const std::string &email, const std::string &code);
+
+        void setPhoneCode(const std::string &phone, const std::string &code);
 
         [[nodiscard]] int64_t getIdByAccessToken(const std::string &accessToken);
 
+        Json::Value getFollows(const std::string &userId);
+
+        bool follow(const std::string &userId, const std::string &followId);
+
+        Json::Value getStarred(const std::string &userId);
+
+        void dataStar(const std::string &userId, const std::string &dataId);
+
     private:
         const Expiration _expiration;
-
-        // TODO: Add more wrappers for basic redis commands
-
-        void _extendRefreshToken(const std::string &refreshToken);
 
         std::string _generateRefreshToken(const std::string &userId);
 
