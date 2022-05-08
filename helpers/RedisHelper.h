@@ -32,31 +32,37 @@ namespace mnemosyne::helpers {
         virtual ~RedisHelper() = default;
 
     protected:
-        void compare(
-                const std::string &key,
-                const std::string &value
-        );
-
         void del(const std::string &key);
 
-        void expire(
-                const std::string &key,
-                const std::chrono::seconds &ttl
-        );
+        void expire(const std::string &key, const std::chrono::seconds &ttl);
+
+        void expire(const std::vector<std::tuple<std::string, std::chrono::seconds>> &params);
 
         std::string get(const std::string &key);
 
         void setAdd(const std::string &key, const std::vector<std::string> &values);
 
+        void setAdd(const std::vector<std::tuple<std::string, std::vector<std::string>>> &params);
+
+        std::vector<std::string> setGetMembers(const std::string &key);
+
+        std::vector<std::vector<std::string>> setGetMembers(const std::vector<std::string> &keys);
+
+        bool setIsMember(const std::string &key, const std::string &value);
+
         void setRemove(const std::string &key, const std::vector<std::string> &values);
+
+        void setRemove(const std::vector<std::tuple<std::string, std::vector<std::string>>> &params);
 
         void set(const std::string &key, const std::string &value);
 
         void setEx(
                 const std::string &key,
-                const int &ttl,
+                int ttl,
                 const std::string &value
         );
+
+        void setEx(const std::vector<std::tuple<std::string, int, std::string>> &params);
 
     private:
         cpp_redis::client _redisClient;
