@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
@@ -24,7 +24,8 @@ endif ()
 
 find_package(cryptopp CONFIG REQUIRED)
 find_library(CPPREDIS_LIB cpp_redis)
-find_package(Drogon CONFIG REQUIRED)
+#find_package(Drogon CONFIG REQUIRED)
+add_subdirectory(drogon)
 find_package(magic_enum CONFIG REQUIRED)
 find_package(mailio CONFIG REQUIRED)
 find_library(TACOPIE_LIB tacopie)
@@ -58,7 +59,8 @@ target_link_libraries(
         PRIVATE
         ${CPPREDIS_LIB}
         cryptopp-static
-        Drogon::Drogon
+#        Drogon::Drogon
+        drogon
         mailio
         magic_enum::magic_enum
         ${TACOPIE_LIB}
