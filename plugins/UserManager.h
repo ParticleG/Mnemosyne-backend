@@ -93,6 +93,8 @@ namespace mnemosyne::plugins {
 
         void dataStar(int64_t userId, int64_t dataId) const;
 
+        void collectionStar(int64_t userId, int64_t collectionId) const;
+
         [[nodiscard]] bool ipLimit(const std::string &ip) const;
 
         [[nodiscard]] bool emailLimit(const std::string &email) const;

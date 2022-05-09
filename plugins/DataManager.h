@@ -8,7 +8,9 @@
 #include <helpers/EmailHelper.h>
 #include <helpers/I18nHelper.h>
 #include <helpers/RequestJson.h>
+#include <models/Collection.h>
 #include <models/Data.h>
+#include <models/Users.h>
 #include <structures/DataRedis.h>
 #include <types/DataType.h>
 
@@ -24,7 +26,7 @@ namespace mnemosyne::plugins {
 
         void shutdown() override;
 
-        void dataUpload(int64_t userId, const helpers::RequestJson &requestJson);
+        Json::Value dataUpload(int64_t userId, const helpers::RequestJson &requestJson);
 
         Json::Value dataFuzzy(const helpers::RequestJson &requestJson);
 
@@ -36,9 +38,23 @@ namespace mnemosyne::plugins {
 
         void dataDelete(int64_t userId, int64_t dataId);
 
+        Json::Value collectionCreate(int64_t userId, const helpers::RequestJson &requestJson);
+
+        Json::Value collectionFuzzy(const helpers::RequestJson &requestJson);
+
+        Json::Value collectionSearch(const helpers::RequestJson &requestJson);
+
+        bool collectionStar(int64_t userId, int64_t collectionId);
+
+        void collectionModify(int64_t userId, const helpers::RequestJson &requestJson);
+
+        void collectionDelete(int64_t userId, int64_t collectionId);
+
     private:
         std::unique_ptr<mnemosyne::structures::DataRedis> _dataRedis;
+        std::unique_ptr<drogon::orm::Mapper<drogon_model::Mnemosyne::Collection>> _collectionMapper;
         std::unique_ptr<drogon::orm::Mapper<drogon_model::Mnemosyne::Data>> _dataMapper;
+        std::unique_ptr<drogon::orm::Mapper<drogon_model::Mnemosyne::Users>> _usersMapper;
     };
 }
 

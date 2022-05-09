@@ -92,7 +92,7 @@ void UserManager::initAndStart(const Json::Value &config) {
         abort();
     }
 
-    _usersMapper = make_unique <orm::Mapper<Mnemosyne::Users>> (app().getDbClient());
+    _usersMapper = make_unique<orm::Mapper<Mnemosyne::Users>>(app().getDbClient());
 
     LOG_INFO << "UserManager loaded.";
 }
@@ -598,6 +598,10 @@ Json::Value UserManager::getStarred(const string &accessToken, int64_t userId) {
 
 void UserManager::dataStar(int64_t userId, int64_t dataId) const {
     _userRedis->dataStar(to_string(userId), to_string(dataId));
+}
+
+void UserManager::collectionStar(int64_t userId, int64_t collectionId) const {
+    _userRedis->collectionStar(to_string(userId), to_string(collectionId));
 }
 
 bool UserManager::ipLimit(const string &ip) const {
