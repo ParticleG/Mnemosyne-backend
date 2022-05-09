@@ -14,7 +14,9 @@ namespace mnemosyne::structures {
     public:
         explicit DataRedis();
 
-        bool dataStar(int64_t userId, int64_t dataId); /// True is starred, false otherwise
+        bool dataStar(const std::string &userId, const std::string &dataId); /// True is starred, false otherwise
+
+        bool collectionStar(const std::string &userId, const std::string &collectionId); /// True is starred, false otherwise
 
     private:
     };

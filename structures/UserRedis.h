@@ -62,6 +62,8 @@ namespace mnemosyne::structures {
 
         void dataStar(const std::string &userId, const std::string &dataId);
 
+        void collectionStar(const std::string &userId, const std::string &collectionId);
+
     private:
         const Expiration _expiration;
 
