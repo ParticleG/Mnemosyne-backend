@@ -13,6 +13,7 @@
  * @param fromTime: timestamp
  * @param endTime: timestamp
  * @param page: UInt64
+ * @param perPage: UInt64
  * @return requestJson: in request attributes
  */
 namespace mnemosyne::filters {
