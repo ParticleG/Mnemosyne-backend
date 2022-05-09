@@ -42,7 +42,7 @@ namespace mnemosyne::helpers {
 
         void setAdd(const std::string &key, const std::vector<std::string> &values);
 
-        void setAdd(const std::vector<std::tuple<std::string, std::vector<std::string>>> &params);
+        void setAdd(const std::vector<std::pair<std::string, std::vector<std::string>>> &params);
 
         std::vector<std::string> setGetMembers(const std::string &key);
 
@@ -52,7 +52,7 @@ namespace mnemosyne::helpers {
 
         void setRemove(const std::string &key, const std::vector<std::string> &values);
 
-        void setRemove(const std::vector<std::tuple<std::string, std::vector<std::string>>> &params);
+        void setRemove(const std::vector<std::pair<std::string, std::vector<std::string>>> &params);
 
         void set(const std::string &key, const std::string &value);
 

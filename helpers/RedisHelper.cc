@@ -144,7 +144,7 @@ void RedisHelper::setAdd(const string &key, const vector<string> &values) {
     _redisClient.sync_commit();
 }
 
-void RedisHelper::setAdd(const vector<tuple<string, vector<string>>> &params) {
+void RedisHelper::setAdd(const vector<pair<string, vector<string>>> &params) {
     for (const auto &[key, values]: params) {
         _redisClient.sadd(_baseKey + ":" + key, values);
     }
@@ -206,7 +206,7 @@ void RedisHelper::setRemove(const string &key, const vector<string> &values) {
     _redisClient.sync_commit();
 }
 
-void RedisHelper::setRemove(const vector<tuple<string, vector<string>>> &params) {
+void RedisHelper::setRemove(const vector<pair<string, vector<string>>> &params) {
     for (const auto &[key, values]: params) {
         _redisClient.srem(_baseKey + ":" + key, values);
     }
