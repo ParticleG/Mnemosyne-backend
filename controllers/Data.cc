@@ -41,10 +41,10 @@ Data::Data() :
 void Data::upload(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        _dataManager->dataUpload(
+        response.setData(_dataManager->dataUpload(
                 _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<RequestJson>("requestJson")
-        );
+        ));
     }, response);
     response.httpCallback(callback);
 }
@@ -72,10 +72,10 @@ void Data::search(const HttpRequestPtr &req, function<void(const HttpResponsePtr
 void Data::star(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        _dataManager->dataStar(
+        response.setData(_dataManager->dataStar(
                 _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<int64_t>("dataId")
-        );
+        ));
     }, response);
     response.httpCallback(callback);
 }

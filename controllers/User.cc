@@ -83,10 +83,10 @@ void User::getFollows(const HttpRequestPtr &req, function<void(const HttpRespons
 void User::follow(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        _userManager->follow(
+        response.setData(_userManager->follow(
                 req->attributes()->get<string>("accessToken"),
                 req->attributes()->get<int64_t>("userId")
-        );
+        ));
     }, response);
     response.httpCallback(callback);
 }
@@ -94,10 +94,10 @@ void User::follow(const HttpRequestPtr &req, function<void(const HttpResponsePtr
 void User::starred(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        _userManager->getStarred(
+        response.setData(_userManager->getStarred(
                 req->attributes()->get<string>("accessToken"),
                 req->attributes()->get<int64_t>("userId")
-        );
+        ));
     }, response);
     response.httpCallback(callback);
 }
