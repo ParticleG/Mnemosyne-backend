@@ -97,19 +97,42 @@ bool UserRedis::follow(const string &userId, const string &followId) {
 
 Json::Value UserRedis::getStarred(const string &userId) {
     Json::Value result;
-    const auto starred = setGetMembers("user:starred:" + userId);
-    for (const auto &dataId: starred) {
-        result["following"].append(stoll(dataId));
+    const auto starred = setGetMembers(
+            {"user:starred:data:" + userId,
+             "user:starred:collection:" + userId}
+    );
+    for (const auto &dataId: starred[0]) {
+        result["data"].append(stoll(dataId));
+    }
+    for (const auto &dataId: starred[1]) {
+        result["collection"].append(stoll(dataId));
     }
     return result;
 }
 
 void UserRedis::dataStar(const string &userId, const string &dataId) {
-    if (setIsMember("user:starred:" + userId, dataId)) {
-        setRemove("user:starred:" + userId, {dataId});
+    if (setIsMember("user:starred:data:" + userId, dataId)) {
+        setRemove("user:starred:data:" + userId, {dataId});
     } else {
-        setAdd("user:starred:" + userId, {dataId});
+        setAdd("user:starred:data:" + userId, {dataId});
     }
+}
+
+void UserRedis::collectionStar(const string &userId, const string &collectionId) {
+    if (setIsMember("user:starred:collection:" + userId, collectionId)) {
+        setRemove("user:starred:collection:" + userId, {collectionId});
+    } else {
+        setAdd("user:starred:collection:" + userId, {collectionId});
+    }
+}
+
+Json::Value UserRedis::getStatistics(const string &userId) {
+    Json::Value result;
+    result["following"] = setCard("user:following:" + userId);
+    result["followers"] = setCard("user:followers:" + userId);
+    result["starred"] = setCard("user:starred:data:" + userId)
+                        + setCard("user:starred:collection:" + userId);
+    return result;
 }
 
 string UserRedis::_generateRefreshToken(const string &userId) {

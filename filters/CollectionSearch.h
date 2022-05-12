@@ -8,8 +8,12 @@
 #include <structures/ExceptionHandlers.h>
 
 /**
- * @brief This filter trims "Data::fuzzy" request body
- * @param query: String
+ * @brief This filter trims "Collection::search" request body
+ * @param name: String
+ * @param description: String
+ * @param tags: Array
+ * @param extra: String
+ * @param creator: Int64
  * @param fromTime: timestamp
  * @param endTime: timestamp
  * @param page: UInt64
@@ -17,9 +21,9 @@
  * @return requestJson: in request attributes
  */
 namespace mnemosyne::filters {
-    class DataFuzzy :
-            public drogon::HttpFilter<DataFuzzy>,
-            public structures::RequestJsonHandler<DataFuzzy> {
+    class CollectionSearch :
+            public drogon::HttpFilter<CollectionSearch>,
+            public structures::RequestJsonHandler<CollectionSearch> {
     public:
         static constexpr char projectName[] = CMAKE_PROJECT_NAME;
 

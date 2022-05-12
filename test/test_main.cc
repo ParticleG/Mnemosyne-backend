@@ -3,29 +3,52 @@
 #include <drogon/drogon_test.h>
 #include <drogon/drogon.h>
 
-DROGON_TEST(BasicTest) {
-    // Add your tests here
+using namespace drogon;
+using namespace std;
+
+DROGON_TEST(AuthTest) {
+    for (int i = 0; i < 12; i++) {
+        CHECK(true);
+    }
+}
+
+DROGON_TEST(UserTest) {
+    for (int i = 0; i < 6; i++) {
+        CHECK(true);
+    }
+}
+
+DROGON_TEST(DataTest) {
+    for (int i = 0; i < 6; i++) {
+        CHECK(true);
+    }
+}
+
+DROGON_TEST(CollectionTest) {
+    for (int i = 0; i < 6; i++) {
+        CHECK(true);
+    }
 }
 
 int main(int argc, char **argv) {
-    using namespace drogon;
+    promise<void> loopStart;
+    auto checkLoopStart = loopStart.get_future();
 
-    std::promise<void> p1;
-    std::future<void> f1 = p1.get_future();
-
-    // Start the main loop on another thread
-    std::thread thr([&]() {
-        // Queues the promise to be fulfilled after starting the loop
-        app().getLoop()->queueInLoop([&p1]() { p1.set_value(); });
+    /** Start the main loop on another thread */
+    thread loopHandler([&]() {
+        /** Queues the promise to be fulfilled after starting the loop */
+        app().getLoop()->queueInLoop([&loopStart]() { loopStart.set_value(); });
+        app().loadConfigFile("config.json");
         app().run();
     });
 
-    // The future is only satisfied after the event loop started
-    f1.get();
-    int status = test::run(argc, argv);
+    /** The future is only satisfied after the event loop started */
+    checkLoopStart.get();
+    auto status = test::run(argc, argv);
 
-    // Ask the event loop to shutdown and wait
+    /** Ask the event loop to shutdown and wait */
     app().getLoop()->queueInLoop([]() { app().quit(); });
-    thr.join();
+    loopHandler.join();
+
     return status;
 }

@@ -2,7 +2,7 @@
 // Created by particleg on 2021/9/24.
 //
 
-#include <controllers/Data.h>
+#include <controllers/Collection.h>
 #include <helpers/ResponseJson.h>
 #include <types/DataType.h>
 
@@ -14,7 +14,7 @@ using namespace mnemosyne::plugins;
 using namespace mnemosyne::structures;
 using namespace mnemosyne::types;
 
-Data::Data() :
+Collection::Collection() :
         ResponseJsonHandler(
                 [](const ResponseException &e, ResponseJson &response) {
                     response.setStatusCode(e.statusCode());
@@ -38,10 +38,10 @@ Data::Data() :
         _dataManager(app().getPlugin<DataManager>()),
         _userManager(app().getPlugin<UserManager>()) {}
 
-void Data::upload(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+void Collection::create(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        response.setData(_dataManager->dataUpload(
+        response.setData(_dataManager->collectionCreate(
                 _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<RequestJson>("requestJson")
         ));
@@ -49,41 +49,41 @@ void Data::upload(const HttpRequestPtr &req, function<void(const HttpResponsePtr
     response.httpCallback(callback);
 }
 
-void Data::fuzzy(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+void Collection::fuzzy(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        response.setData(_dataManager->dataFuzzy(
+        response.setData(_dataManager->collectionFuzzy(
                 req->attributes()->get<RequestJson>("requestJson")
         ));
     }, response);
     response.httpCallback(callback);
 }
 
-void Data::search(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+void Collection::search(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        response.setData(_dataManager->dataSearch(
+        response.setData(_dataManager->collectionSearch(
                 req->attributes()->get<RequestJson>("requestJson")
         ));
     }, response);
     response.httpCallback(callback);
 }
 
-void Data::star(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+void Collection::star(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        response.setData(_dataManager->dataStar(
+        response.setData(_dataManager->collectionStar(
                 _userManager->getUserId(req->attributes()->get<string>("accessToken")),
-                req->attributes()->get<int64_t>("dataId")
+                req->attributes()->get<int64_t>("collectionId")
         ));
     }, response);
     response.httpCallback(callback);
 }
 
-void Data::modify(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+void Collection::modify(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        _dataManager->dataModify(
+        _dataManager->collectionModify(
                 _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<RequestJson>("requestJson")
         );
@@ -91,12 +91,12 @@ void Data::modify(const HttpRequestPtr &req, function<void(const HttpResponsePtr
     response.httpCallback(callback);
 }
 
-void Data::remove(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+void Collection::remove(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
-        _dataManager->dataDelete(
+        _dataManager->collectionDelete(
                 _userManager->getUserId(req->attributes()->get<string>("accessToken")),
-                req->attributes()->get<int64_t>("dataId")
+                req->attributes()->get<int64_t>("collectionId")
         );
     }, response);
     response.httpCallback(callback);

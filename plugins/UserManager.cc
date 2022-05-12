@@ -92,7 +92,9 @@ void UserManager::initAndStart(const Json::Value &config) {
         abort();
     }
 
-    _usersMapper = make_unique <orm::Mapper<Mnemosyne::Users>> (app().getDbClient());
+    _collectionMapper = make_unique<orm::Mapper<Mnemosyne::Collection>>(app().getDbClient());
+    _dataMapper = make_unique<orm::Mapper<Mnemosyne::Data>>(app().getDbClient());
+    _usersMapper = make_unique<orm::Mapper<Mnemosyne::Users>>(app().getDbClient());
 
     LOG_INFO << "UserManager loaded.";
 }
@@ -489,6 +491,19 @@ Json::Value UserManager::getUserInfo(const string &accessToken, int64_t userId) 
             user.removeMember("email");
             user.removeMember("phone");
         }
+
+        const auto statistics = _userRedis->getStatistics(to_string(targetId));
+        user["statistics"] = statistics;
+        user["statistics"]["collections"] = _collectionMapper->count(orm::Criteria(
+                Mnemosyne::Collection::Cols::_creator,
+                orm::CompareOperator::EQ,
+                targetId
+        ));
+        user["statistics"]["posts"] = _dataMapper->count(orm::Criteria(
+                Mnemosyne::Data::Cols::_creator,
+                orm::CompareOperator::EQ,
+                targetId
+        ));
         return user;
     } catch (const orm::UnexpectedRows &e) {
         LOG_DEBUG << "Unexpected rows: " << e.what();
@@ -598,6 +613,10 @@ Json::Value UserManager::getStarred(const string &accessToken, int64_t userId) {
 
 void UserManager::dataStar(int64_t userId, int64_t dataId) const {
     _userRedis->dataStar(to_string(userId), to_string(dataId));
+}
+
+void UserManager::collectionStar(int64_t userId, int64_t collectionId) const {
+    _userRedis->collectionStar(to_string(userId), to_string(collectionId));
 }
 
 bool UserManager::ipLimit(const string &ip) const {
