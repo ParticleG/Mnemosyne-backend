@@ -102,6 +102,31 @@ void RedisHelper::del(const string &key) {
     _redisClient.sync_commit();
 }
 
+vector<bool> RedisHelper::exists(const vector<string> &keys) {
+    vector<string> tempKeys;
+    transform(
+            keys.begin(),
+            keys.end(),
+            back_inserter(tempKeys),
+            [this](const auto &key) {
+                return _baseKey + ":" + key;
+            }
+    );
+    auto future = _redisClient.exists(tempKeys);
+    _redisClient.sync_commit();
+    const auto reply = future.get();
+
+    if (reply.is_null()) {
+        throw redis_exception::KeyNotFound({});
+    }
+    const auto &array = reply.as_array();
+    vector<bool> result;
+    transform(array.begin(), array.end(), back_inserter(result), [](const auto &item) {
+        return item.as_integer();
+    });
+    return result;
+}
+
 void RedisHelper::expire(const string &key, const chrono::seconds &ttl) {
     const auto tempKey = _baseKey + ":" + key;
     auto future = _redisClient.expire(tempKey, static_cast<int>(ttl.count()));
@@ -114,6 +139,7 @@ void RedisHelper::expire(const string &key, const chrono::seconds &ttl) {
 
 void RedisHelper::expire(const vector<tuple<string, chrono::seconds>> &params) {
     vector<future<reply>> futures;
+    futures.reserve(params.size());
     for (const auto &[key, ttl]: params) {
         futures.push_back(_redisClient.expire(_baseKey + ":" + key, static_cast<int>(ttl.count())));
     }
@@ -149,6 +175,17 @@ void RedisHelper::setAdd(const vector<pair<string, vector<string>>> &params) {
         _redisClient.sadd(_baseKey + ":" + key, values);
     }
     _redisClient.sync_commit();
+}
+
+int64_t RedisHelper::setCard(const string &key) {
+    const auto tempKey = _baseKey + ":" + key;
+    auto future = _redisClient.scard(tempKey);
+    _redisClient.sync_commit();
+    const auto reply = future.get();
+    if (reply.is_null()) {
+        throw redis_exception::KeyNotFound(tempKey);
+    }
+    return reply.as_integer();
 }
 
 vector<string> RedisHelper::setGetMembers(const string &key) {

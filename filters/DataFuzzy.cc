@@ -19,7 +19,7 @@ void DataFuzzy::doFilter(
     handleExceptions([&]() {
         auto request = RequestJson(req);
         request.require("query", JsonValue::String);
-        request.trim("fromTime", JsonValue::String);
+        request.trim("startTime", JsonValue::String);
         request.trim("endTime", JsonValue::String);
         request.trim("page", JsonValue::UInt64);
         request.trim("perPage", JsonValue::UInt64);

@@ -8,6 +8,8 @@
 #include <helpers/EmailHelper.h>
 #include <helpers/I18nHelper.h>
 #include <helpers/RequestJson.h>
+#include <models/Collection.h>
+#include <models/Data.h>
 #include <models/Users.h>
 #include <structures/UserRedis.h>
 
@@ -107,6 +109,8 @@ namespace mnemosyne::plugins {
 
         std::unique_ptr<helpers::EmailHelper> _emailHelper;
         std::unique_ptr<mnemosyne::structures::UserRedis> _userRedis;
+        std::unique_ptr<drogon::orm::Mapper<drogon_model::Mnemosyne::Collection>> _collectionMapper;
+        std::unique_ptr<drogon::orm::Mapper<drogon_model::Mnemosyne::Data>> _dataMapper;
         std::unique_ptr<drogon::orm::Mapper<drogon_model::Mnemosyne::Users>> _usersMapper;
 
         void _checkEmailCode(const std::string &email, const std::string &code);

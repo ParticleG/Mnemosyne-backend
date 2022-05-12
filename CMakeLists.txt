@@ -89,5 +89,5 @@ install(
 # set_property(TARGET ${PROJECT_NAME} PROPERTY ENABLE_EXPORTS ON)
 
 # ##############################################################################
-
-#add_subdirectory(test)
+enable_testing()
+add_subdirectory(test)

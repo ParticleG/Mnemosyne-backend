@@ -34,6 +34,8 @@ namespace mnemosyne::helpers {
     protected:
         void del(const std::string &key);
 
+        std::vector<bool> exists(const std::vector<std::string> &keys);
+
         void expire(const std::string &key, const std::chrono::seconds &ttl);
 
         void expire(const std::vector<std::tuple<std::string, std::chrono::seconds>> &params);
@@ -43,6 +45,8 @@ namespace mnemosyne::helpers {
         void setAdd(const std::string &key, const std::vector<std::string> &values);
 
         void setAdd(const std::vector<std::pair<std::string, std::vector<std::string>>> &params);
+
+        int64_t setCard(const std::string &key);
 
         std::vector<std::string> setGetMembers(const std::string &key);
 

@@ -92,6 +92,8 @@ void UserManager::initAndStart(const Json::Value &config) {
         abort();
     }
 
+    _collectionMapper = make_unique<orm::Mapper<Mnemosyne::Collection>>(app().getDbClient());
+    _dataMapper = make_unique<orm::Mapper<Mnemosyne::Data>>(app().getDbClient());
     _usersMapper = make_unique<orm::Mapper<Mnemosyne::Users>>(app().getDbClient());
 
     LOG_INFO << "UserManager loaded.";
@@ -489,6 +491,19 @@ Json::Value UserManager::getUserInfo(const string &accessToken, int64_t userId) 
             user.removeMember("email");
             user.removeMember("phone");
         }
+
+        const auto statistics = _userRedis->getStatistics(to_string(targetId));
+        user["statistics"] = statistics;
+        user["statistics"]["collections"] = _collectionMapper->count(orm::Criteria(
+                Mnemosyne::Collection::Cols::_creator,
+                orm::CompareOperator::EQ,
+                targetId
+        ));
+        user["statistics"]["posts"] = _dataMapper->count(orm::Criteria(
+                Mnemosyne::Data::Cols::_creator,
+                orm::CompareOperator::EQ,
+                targetId
+        ));
         return user;
     } catch (const orm::UnexpectedRows &e) {
         LOG_DEBUG << "Unexpected rows: " << e.what();

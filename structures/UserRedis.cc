@@ -126,6 +126,15 @@ void UserRedis::collectionStar(const string &userId, const string &collectionId)
     }
 }
 
+Json::Value UserRedis::getStatistics(const string &userId) {
+    Json::Value result;
+    result["following"] = setCard("user:following:" + userId);
+    result["followers"] = setCard("user:followers:" + userId);
+    result["starred"] = setCard("user:starred:data:" + userId)
+                        + setCard("user:starred:collection:" + userId);
+    return result;
+}
+
 string UserRedis::_generateRefreshToken(const string &userId) {
     auto refreshToken = crypto::keccak(drogon::utils::getUuid());
     setEx(
