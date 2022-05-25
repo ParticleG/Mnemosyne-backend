@@ -3,5 +3,4 @@
 	url = https://github.com/microsoft/vcpkg
 [submodule "drogon"]
 	path = drogon
-	url = https://github.com/ParticleG/drogon
-	branch = postgres
+	url = https://github.com/drogonframework/drogon
