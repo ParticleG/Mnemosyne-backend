@@ -9,6 +9,7 @@
 
 /**
  * @brief This filter trims "Data::fuzzy" request body
+ * @param type: String
  * @param query: String
  * @param fromTime: timestamp
  * @param endTime: timestamp

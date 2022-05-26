@@ -6,7 +6,6 @@
 
 #include <drogon/HttpController.h>
 #include <plugins/DataManager.h>
-#include <plugins/UserManager.h>
 #include <structures/ExceptionHandlers.h>
 
 namespace mnemosyne::api::v1 {
@@ -25,7 +24,6 @@ namespace mnemosyne::api::v1 {
                     Data::upload,
                     "/upload",
                     drogon::Post,
-                    "mnemosyne::filters::CheckAccessToken",
                     "mnemosyne::filters::CheckDataType",
                     "mnemosyne::filters::DataUpload",
             );
@@ -44,24 +42,15 @@ namespace mnemosyne::api::v1 {
                     "mnemosyne::filters::DataSearch",
             );
             METHOD_ADD(
-                    Data::star,
-                    "/star",
-                    drogon::Post,
-                    "mnemosyne::filters::CheckAccessToken",
-                    "mnemosyne::filters::CheckDataId",
-            );
-            METHOD_ADD(
                     Data::modify,
                     "/modify",
                     drogon::Put,
-                    "mnemosyne::filters::CheckAccessToken",
                     "mnemosyne::filters::DataModify",
             );
             METHOD_ADD(
                     Data::remove,
                     "/remove",
                     drogon::Post,
-                    "mnemosyne::filters::CheckAccessToken",
                     "mnemosyne::filters::CheckDataId",
             );
         METHOD_LIST_END
@@ -72,14 +61,11 @@ namespace mnemosyne::api::v1 {
 
         void search(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
-        void star(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
-
         void modify(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
         void remove(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
     private:
         mnemosyne::plugins::DataManager *_dataManager;
-        mnemosyne::plugins::UserManager *_userManager;
     };
 }

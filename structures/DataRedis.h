@@ -6,7 +6,6 @@
 
 #include <drogon/drogon.h>
 #include <helpers/RedisHelper.h>
-#include <structures/RedisToken.h>
 #include <types/DataType.h>
 
 namespace mnemosyne::structures {

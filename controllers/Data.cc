@@ -35,14 +35,12 @@ Data::Data() :
                     response.setReason(e);
                 }
         ),
-        _dataManager(app().getPlugin<DataManager>()),
-        _userManager(app().getPlugin<UserManager>()) {}
+        _dataManager(app().getPlugin<DataManager>()){}
 
 void Data::upload(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
         response.setData(_dataManager->dataUpload(
-                _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<RequestJson>("requestJson")
         ));
     }, response);
@@ -69,22 +67,10 @@ void Data::search(const HttpRequestPtr &req, function<void(const HttpResponsePtr
     response.httpCallback(callback);
 }
 
-void Data::star(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
-    ResponseJson response;
-    handleExceptions([&]() {
-        response.setData(_dataManager->dataStar(
-                _userManager->getUserId(req->attributes()->get<string>("accessToken")),
-                req->attributes()->get<int64_t>("dataId")
-        ));
-    }, response);
-    response.httpCallback(callback);
-}
-
 void Data::modify(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
         _dataManager->dataModify(
-                _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<RequestJson>("requestJson")
         );
     }, response);
@@ -95,7 +81,6 @@ void Data::remove(const HttpRequestPtr &req, function<void(const HttpResponsePtr
     ResponseJson response;
     handleExceptions([&]() {
         _dataManager->dataDelete(
-                _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<int64_t>("dataId")
         );
     }, response);

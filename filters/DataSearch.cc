@@ -18,6 +18,7 @@ void DataSearch::doFilter(
 ) {
     handleExceptions([&]() {
         auto request = RequestJson(req);
+        request.trim("type", JsonValue::String);
         request.trim("name", JsonValue::String);
         request.trim("description", JsonValue::String);
         request.trim("tags", JsonValue::Array);
@@ -27,7 +28,6 @@ void DataSearch::doFilter(
         request.trim("endTime", JsonValue::String);
         request.trim("page", JsonValue::UInt64);
         request.trim("perPage", JsonValue::UInt64);
-        request.ref()["type"] = req->attributes()->get<std::string>("dataType");
         req->attributes()->insert("requestJson", request);
         nextCb();
     }, failedCb);

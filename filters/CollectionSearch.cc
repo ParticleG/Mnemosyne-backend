@@ -27,7 +27,6 @@ void CollectionSearch::doFilter(
         request.trim("endTime", JsonValue::String);
         request.trim("page", JsonValue::UInt64);
         request.trim("perPage", JsonValue::UInt64);
-        request.ref()["type"] = req->attributes()->get<std::string>("dataType");
         req->attributes()->insert("requestJson", request);
         nextCb();
     }, failedCb);

@@ -9,6 +9,7 @@
 
 /**
  * @brief This filter trims "Data::search" request body
+ * @param type: String
  * @param name: String
  * @param description: String
  * @param tags: Array

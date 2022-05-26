@@ -10,6 +10,7 @@
 /**
  * @brief This filter checks "Data::modify" request body
  * @param id: Int64
+ * @param type: String
  * @param name: String
  * @param description: String
  * @param tags: Array

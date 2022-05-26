@@ -35,14 +35,12 @@ Collection::Collection() :
                     response.setReason(e);
                 }
         ),
-        _dataManager(app().getPlugin<DataManager>()),
-        _userManager(app().getPlugin<UserManager>()) {}
+        _dataManager(app().getPlugin<DataManager>()){}
 
 void Collection::create(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
         response.setData(_dataManager->collectionCreate(
-                _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<RequestJson>("requestJson")
         ));
     }, response);
@@ -69,22 +67,10 @@ void Collection::search(const HttpRequestPtr &req, function<void(const HttpRespo
     response.httpCallback(callback);
 }
 
-void Collection::star(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
-    ResponseJson response;
-    handleExceptions([&]() {
-        response.setData(_dataManager->collectionStar(
-                _userManager->getUserId(req->attributes()->get<string>("accessToken")),
-                req->attributes()->get<int64_t>("collectionId")
-        ));
-    }, response);
-    response.httpCallback(callback);
-}
-
 void Collection::modify(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
         _dataManager->collectionModify(
-                _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<RequestJson>("requestJson")
         );
     }, response);
@@ -95,7 +81,6 @@ void Collection::remove(const HttpRequestPtr &req, function<void(const HttpRespo
     ResponseJson response;
     handleExceptions([&]() {
         _dataManager->collectionDelete(
-                _userManager->getUserId(req->attributes()->get<string>("accessToken")),
                 req->attributes()->get<int64_t>("collectionId")
         );
     }, response);
