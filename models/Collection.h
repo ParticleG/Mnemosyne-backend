@@ -48,10 +48,7 @@ class Collection
         static const std::string _tags;
         static const std::string _content;
         static const std::string _extra;
-        static const std::string _preview;
-        static const std::string _creator;
         static const std::string _created;
-        static const std::string _visibility;
     };
 
     const static int primaryKeyNumber;
@@ -158,24 +155,6 @@ class Collection
     void setExtra(std::string &&pExtra) noexcept;
     void setExtraToNull() noexcept;
 
-    /**  For column preview  */
-    ///Get the value of the column preview, returns the default value if the column is null
-    const std::string &getValueOfPreview() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getPreview() const noexcept;
-    ///Set the value of the column preview
-    void setPreview(const std::string &pPreview) noexcept;
-    void setPreview(std::string &&pPreview) noexcept;
-    void setPreviewToNull() noexcept;
-
-    /**  For column creator  */
-    ///Get the value of the column creator, returns the default value if the column is null
-    const int64_t &getValueOfCreator() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int64_t> &getCreator() const noexcept;
-    ///Set the value of the column creator
-    void setCreator(const int64_t &pCreator) noexcept;
-
     /**  For column created  */
     ///Get the value of the column created, returns the default value if the column is null
     const ::trantor::Date &getValueOfCreated() const noexcept;
@@ -184,17 +163,8 @@ class Collection
     ///Set the value of the column created
     void setCreated(const ::trantor::Date &pCreated) noexcept;
 
-    /**  For column visibility  */
-    ///Get the value of the column visibility, returns the default value if the column is null
-    const std::string &getValueOfVisibility() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getVisibility() const noexcept;
-    ///Set the value of the column visibility
-    void setVisibility(const std::string &pVisibility) noexcept;
-    void setVisibility(std::string &&pVisibility) noexcept;
 
-
-    static size_t getColumnNumber() noexcept {  return 10;  }
+    static size_t getColumnNumber() noexcept {  return 7;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -217,10 +187,7 @@ class Collection
     std::shared_ptr<std::string> tags_;
     std::shared_ptr<std::string> content_;
     std::shared_ptr<std::string> extra_;
-    std::shared_ptr<std::string> preview_;
-    std::shared_ptr<int64_t> creator_;
     std::shared_ptr<::trantor::Date> created_;
-    std::shared_ptr<std::string> visibility_;
     struct MetaData
     {
         const std::string colName_;
@@ -232,7 +199,7 @@ class Collection
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[10]={ false };
+    bool dirtyFlag_[7]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -280,26 +247,9 @@ class Collection
             sql += "extra,";
             ++parametersCount;
         }
-        if(dirtyFlag_[6])
-        {
-            sql += "preview,";
-            ++parametersCount;
-        }
-        sql += "creator,";
-        ++parametersCount;
-        if(!dirtyFlag_[7])
-        {
-            needSelection=true;
-        }
         sql += "created,";
         ++parametersCount;
-        if(!dirtyFlag_[8])
-        {
-            needSelection=true;
-        }
-        sql += "visibility,";
-        ++parametersCount;
-        if(!dirtyFlag_[9])
+        if(!dirtyFlag_[6])
         {
             needSelection=true;
         }
@@ -354,29 +304,6 @@ class Collection
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[6])
-        {
-            n = sprintf(placeholderStr,"$%d,",placeholder++);
-            sql.append(placeholderStr, n);
-        }
-        if(dirtyFlag_[7])
-        {
-            n = sprintf(placeholderStr,"$%d,",placeholder++);
-            sql.append(placeholderStr, n);
-        }
-        else
-        {
-            sql +="default,";
-        }
-        if(dirtyFlag_[8])
-        {
-            n = sprintf(placeholderStr,"$%d,",placeholder++);
-            sql.append(placeholderStr, n);
-        }
-        else
-        {
-            sql +="default,";
-        }
-        if(dirtyFlag_[9])
         {
             n = sprintf(placeholderStr,"$%d,",placeholder++);
             sql.append(placeholderStr, n);

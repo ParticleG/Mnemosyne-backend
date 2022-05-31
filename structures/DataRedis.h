@@ -10,13 +10,21 @@
 
 namespace mnemosyne::structures {
     class DataRedis : public helpers::RedisHelper {
+    private:
+        struct Expiration {
+            [[nodiscard]] int getCacheSeconds() const {
+                return static_cast<int>(cache.count());
+            }
+
+            std::chrono::seconds cache{};
+        };
+
     public:
-        explicit DataRedis();
+        explicit DataRedis(Expiration expiration);
 
-        bool dataStar(const std::string &userId, const std::string &dataId); /// True is starred, false otherwise
-
-        bool collectionStar(const std::string &userId, const std::string &collectionId); /// True is starred, false otherwise
+        DataRedis(DataRedis &&redis) noexcept;
 
     private:
+        const Expiration _expiration;
     };
 }

@@ -21,25 +21,34 @@ namespace mnemosyne::api::v1 {
 
         METHOD_LIST_BEGIN
             METHOD_ADD(
+                    Data::post,
+                    "/post",
+                    drogon::Post,
+                    "mnemosyne::filters::DataPost",
+            );
+            METHOD_ADD(
                     Data::upload,
                     "/upload",
                     drogon::Post,
-                    "mnemosyne::filters::CheckDataType",
                     "mnemosyne::filters::DataUpload",
             );
             METHOD_ADD(
                     Data::fuzzy,
                     "/fuzzy",
                     drogon::Post,
-                    "mnemosyne::filters::CheckDataType",
                     "mnemosyne::filters::DataFuzzy",
             );
             METHOD_ADD(
                     Data::search,
                     "/search",
                     drogon::Post,
-                    "mnemosyne::filters::CheckDataType",
                     "mnemosyne::filters::DataSearch",
+            );
+            METHOD_ADD(
+                    Data::info,
+                    "/info",
+                    drogon::Get,
+                    "mnemosyne::filters::CheckDataId",
             );
             METHOD_ADD(
                     Data::modify,
@@ -55,11 +64,15 @@ namespace mnemosyne::api::v1 {
             );
         METHOD_LIST_END
 
+        void post(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
+
         void upload(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
         void fuzzy(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
         void search(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
+
+        void info(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
         void modify(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 

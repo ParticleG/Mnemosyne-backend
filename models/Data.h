@@ -49,11 +49,8 @@ class Data
         static const std::string _tags;
         static const std::string _content;
         static const std::string _extra;
-        static const std::string _preview;
         static const std::string _collection;
-        static const std::string _creator;
         static const std::string _created;
-        static const std::string _visibility;
     };
 
     const static int primaryKeyNumber;
@@ -170,16 +167,6 @@ class Data
     void setExtra(std::string &&pExtra) noexcept;
     void setExtraToNull() noexcept;
 
-    /**  For column preview  */
-    ///Get the value of the column preview, returns the default value if the column is null
-    const std::string &getValueOfPreview() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getPreview() const noexcept;
-    ///Set the value of the column preview
-    void setPreview(const std::string &pPreview) noexcept;
-    void setPreview(std::string &&pPreview) noexcept;
-    void setPreviewToNull() noexcept;
-
     /**  For column collection  */
     ///Get the value of the column collection, returns the default value if the column is null
     const int64_t &getValueOfCollection() const noexcept;
@@ -187,14 +174,7 @@ class Data
     const std::shared_ptr<int64_t> &getCollection() const noexcept;
     ///Set the value of the column collection
     void setCollection(const int64_t &pCollection) noexcept;
-
-    /**  For column creator  */
-    ///Get the value of the column creator, returns the default value if the column is null
-    const int64_t &getValueOfCreator() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int64_t> &getCreator() const noexcept;
-    ///Set the value of the column creator
-    void setCreator(const int64_t &pCreator) noexcept;
+    void setCollectionToNull() noexcept;
 
     /**  For column created  */
     ///Get the value of the column created, returns the default value if the column is null
@@ -204,17 +184,8 @@ class Data
     ///Set the value of the column created
     void setCreated(const ::trantor::Date &pCreated) noexcept;
 
-    /**  For column visibility  */
-    ///Get the value of the column visibility, returns the default value if the column is null
-    const std::string &getValueOfVisibility() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getVisibility() const noexcept;
-    ///Set the value of the column visibility
-    void setVisibility(const std::string &pVisibility) noexcept;
-    void setVisibility(std::string &&pVisibility) noexcept;
 
-
-    static size_t getColumnNumber() noexcept {  return 12;  }
+    static size_t getColumnNumber() noexcept {  return 9;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -238,11 +209,8 @@ class Data
     std::shared_ptr<std::string> tags_;
     std::shared_ptr<std::string> content_;
     std::shared_ptr<std::string> extra_;
-    std::shared_ptr<std::string> preview_;
     std::shared_ptr<int64_t> collection_;
-    std::shared_ptr<int64_t> creator_;
     std::shared_ptr<::trantor::Date> created_;
-    std::shared_ptr<std::string> visibility_;
     struct MetaData
     {
         const std::string colName_;
@@ -254,7 +222,7 @@ class Data
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[12]={ false };
+    bool dirtyFlag_[9]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -280,10 +248,11 @@ class Data
         {
             needSelection=true;
         }
-        if(dirtyFlag_[2])
+        sql += "name,";
+        ++parametersCount;
+        if(!dirtyFlag_[2])
         {
-            sql += "name,";
-            ++parametersCount;
+            needSelection=true;
         }
         if(dirtyFlag_[3])
         {
@@ -308,30 +277,12 @@ class Data
         }
         if(dirtyFlag_[7])
         {
-            sql += "preview,";
+            sql += "collection,";
             ++parametersCount;
-        }
-        sql += "collection,";
-        ++parametersCount;
-        if(!dirtyFlag_[8])
-        {
-            needSelection=true;
-        }
-        sql += "creator,";
-        ++parametersCount;
-        if(!dirtyFlag_[9])
-        {
-            needSelection=true;
         }
         sql += "created,";
         ++parametersCount;
-        if(!dirtyFlag_[10])
-        {
-            needSelection=true;
-        }
-        sql += "visibility,";
-        ++parametersCount;
-        if(!dirtyFlag_[11])
+        if(!dirtyFlag_[8])
         {
             needSelection=true;
         }
@@ -361,6 +312,10 @@ class Data
         {
             n = sprintf(placeholderStr,"$%d,",placeholder++);
             sql.append(placeholderStr, n);
+        }
+        else
+        {
+            sql +="default,";
         }
         if(dirtyFlag_[3])
         {
@@ -392,33 +347,6 @@ class Data
             sql.append(placeholderStr, n);
         }
         if(dirtyFlag_[8])
-        {
-            n = sprintf(placeholderStr,"$%d,",placeholder++);
-            sql.append(placeholderStr, n);
-        }
-        else
-        {
-            sql +="default,";
-        }
-        if(dirtyFlag_[9])
-        {
-            n = sprintf(placeholderStr,"$%d,",placeholder++);
-            sql.append(placeholderStr, n);
-        }
-        else
-        {
-            sql +="default,";
-        }
-        if(dirtyFlag_[10])
-        {
-            n = sprintf(placeholderStr,"$%d,",placeholder++);
-            sql.append(placeholderStr, n);
-        }
-        else
-        {
-            sql +="default,";
-        }
-        if(dirtyFlag_[11])
         {
             n = sprintf(placeholderStr,"$%d,",placeholder++);
             sql.append(placeholderStr, n);

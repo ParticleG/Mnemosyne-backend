@@ -3,7 +3,7 @@
 using namespace drogon;
 
 int main() {
-    app().loadConfigFile("config.json");
+    app().loadConfigFile("config.no-user.json");
     app().run();
     return 0;
 }

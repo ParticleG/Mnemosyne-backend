@@ -35,13 +35,24 @@ Data::Data() :
                     response.setReason(e);
                 }
         ),
-        _dataManager(app().getPlugin<DataManager>()){}
+        _dataManager(app().getPlugin<DataManager>()) {}
+
+void Data::post(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        response.setData(_dataManager->dataPost(
+                req->attributes()->get<RequestJson>("requestJson")
+        ));
+    }, response);
+    response.httpCallback(callback);
+}
 
 void Data::upload(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
     handleExceptions([&]() {
         response.setData(_dataManager->dataUpload(
-                req->attributes()->get<RequestJson>("requestJson")
+                req->attributes()->get<RequestJson>("requestJson"),
+                req->attributes()->get<vector<HttpFile>>("files")[0]
         ));
     }, response);
     response.httpCallback(callback);
@@ -62,6 +73,16 @@ void Data::search(const HttpRequestPtr &req, function<void(const HttpResponsePtr
     handleExceptions([&]() {
         response.setData(_dataManager->dataSearch(
                 req->attributes()->get<RequestJson>("requestJson")
+        ));
+    }, response);
+    response.httpCallback(callback);
+}
+
+void Data::info(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        response.setData(_dataManager->dataInfo(
+                req->attributes()->get<int64_t>("dataId")
         ));
     }, response);
     response.httpCallback(callback);

@@ -39,6 +39,12 @@ namespace mnemosyne::api::v1 {
                     "mnemosyne::filters::CollectionSearch",
             );
             METHOD_ADD(
+                    Collection::info,
+                    "/info",
+                    drogon::Get,
+                    "mnemosyne::filters::CheckCollectionId",
+            );
+            METHOD_ADD(
                     Collection::modify,
                     "/modify",
                     drogon::Put,
@@ -57,6 +63,8 @@ namespace mnemosyne::api::v1 {
         void fuzzy(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
         void search(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
+
+        void info(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 
         void modify(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback);
 

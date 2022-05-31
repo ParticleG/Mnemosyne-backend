@@ -19,10 +19,7 @@ const std::string Collection::Cols::_description = "description";
 const std::string Collection::Cols::_tags = "tags";
 const std::string Collection::Cols::_content = "content";
 const std::string Collection::Cols::_extra = "extra";
-const std::string Collection::Cols::_preview = "preview";
-const std::string Collection::Cols::_creator = "creator";
 const std::string Collection::Cols::_created = "created";
-const std::string Collection::Cols::_visibility = "visibility";
 const std::string Collection::primaryKeyName = "id";
 const bool Collection::hasPrimaryKey = true;
 const std::string Collection::tableName = "collection";
@@ -34,10 +31,7 @@ const std::vector<typename Collection::MetaData> Collection::metaData_={
 {"tags","std::string","ARRAY",0,0,0,1},
 {"content","std::string","ARRAY",0,0,0,1},
 {"extra","std::string","text",0,0,0,0},
-{"preview","std::string","text",0,0,0,0},
-{"creator","int64_t","bigint",8,0,0,1},
-{"created","::trantor::Date","timestamp without time zone",0,0,0,1},
-{"visibility","std::string","USER-DEFINED",0,0,0,1}
+{"created","::trantor::Date","timestamp without time zone",0,0,0,1}
 };
 const std::string &Collection::getColumnName(size_t index) noexcept(false)
 {
@@ -72,14 +66,6 @@ Collection::Collection(const Row &r, const ssize_t indexOffset) noexcept
         {
             extra_=std::make_shared<std::string>(r["extra"].as<std::string>());
         }
-        if(!r["preview"].isNull())
-        {
-            preview_=std::make_shared<std::string>(r["preview"].as<std::string>());
-        }
-        if(!r["creator"].isNull())
-        {
-            creator_=std::make_shared<int64_t>(r["creator"].as<int64_t>());
-        }
         if(!r["created"].isNull())
         {
             auto timeStr = r["created"].as<std::string>();
@@ -102,15 +88,11 @@ Collection::Collection(const Row &r, const ssize_t indexOffset) noexcept
                 created_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
         }
-        if(!r["visibility"].isNull())
-        {
-            visibility_=std::make_shared<std::string>(r["visibility"].as<std::string>());
-        }
     }
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 10 > r.size())
+        if(offset + 7 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
@@ -149,16 +131,6 @@ Collection::Collection(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 6;
         if(!r[index].isNull())
         {
-            preview_=std::make_shared<std::string>(r[index].as<std::string>());
-        }
-        index = offset + 7;
-        if(!r[index].isNull())
-        {
-            creator_=std::make_shared<int64_t>(r[index].as<int64_t>());
-        }
-        index = offset + 8;
-        if(!r[index].isNull())
-        {
             auto timeStr = r[index].as<std::string>();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
@@ -179,18 +151,13 @@ Collection::Collection(const Row &r, const ssize_t indexOffset) noexcept
                 created_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
         }
-        index = offset + 9;
-        if(!r[index].isNull())
-        {
-            visibility_=std::make_shared<std::string>(r[index].as<std::string>());
-        }
     }
 
 }
 
 Collection::Collection(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 10)
+    if(pMasqueradingVector.size() != 7)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -248,23 +215,7 @@ Collection::Collection(const Json::Value &pJson, const std::vector<std::string> 
         dirtyFlag_[6] = true;
         if(!pJson[pMasqueradingVector[6]].isNull())
         {
-            preview_=std::make_shared<std::string>(pJson[pMasqueradingVector[6]].asString());
-        }
-    }
-    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
-    {
-        dirtyFlag_[7] = true;
-        if(!pJson[pMasqueradingVector[7]].isNull())
-        {
-            creator_=std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[7]].asInt64());
-        }
-    }
-    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
-    {
-        dirtyFlag_[8] = true;
-        if(!pJson[pMasqueradingVector[8]].isNull())
-        {
-            auto timeStr = pJson[pMasqueradingVector[8]].asString();
+            auto timeStr = pJson[pMasqueradingVector[6]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -283,14 +234,6 @@ Collection::Collection(const Json::Value &pJson, const std::vector<std::string> 
                 }
                 created_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
-        }
-    }
-    if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
-    {
-        dirtyFlag_[9] = true;
-        if(!pJson[pMasqueradingVector[9]].isNull())
-        {
-            visibility_=std::make_shared<std::string>(pJson[pMasqueradingVector[9]].asString());
         }
     }
 }
@@ -345,25 +288,9 @@ Collection::Collection(const Json::Value &pJson) noexcept(false)
             extra_=std::make_shared<std::string>(pJson["extra"].asString());
         }
     }
-    if(pJson.isMember("preview"))
-    {
-        dirtyFlag_[6]=true;
-        if(!pJson["preview"].isNull())
-        {
-            preview_=std::make_shared<std::string>(pJson["preview"].asString());
-        }
-    }
-    if(pJson.isMember("creator"))
-    {
-        dirtyFlag_[7]=true;
-        if(!pJson["creator"].isNull())
-        {
-            creator_=std::make_shared<int64_t>((int64_t)pJson["creator"].asInt64());
-        }
-    }
     if(pJson.isMember("created"))
     {
-        dirtyFlag_[8]=true;
+        dirtyFlag_[6]=true;
         if(!pJson["created"].isNull())
         {
             auto timeStr = pJson["created"].asString();
@@ -387,20 +314,12 @@ Collection::Collection(const Json::Value &pJson) noexcept(false)
             }
         }
     }
-    if(pJson.isMember("visibility"))
-    {
-        dirtyFlag_[9]=true;
-        if(!pJson["visibility"].isNull())
-        {
-            visibility_=std::make_shared<std::string>(pJson["visibility"].asString());
-        }
-    }
 }
 
 void Collection::updateByMasqueradedJson(const Json::Value &pJson,
                                             const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 10)
+    if(pMasqueradingVector.size() != 7)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -457,23 +376,7 @@ void Collection::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[6] = true;
         if(!pJson[pMasqueradingVector[6]].isNull())
         {
-            preview_=std::make_shared<std::string>(pJson[pMasqueradingVector[6]].asString());
-        }
-    }
-    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
-    {
-        dirtyFlag_[7] = true;
-        if(!pJson[pMasqueradingVector[7]].isNull())
-        {
-            creator_=std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[7]].asInt64());
-        }
-    }
-    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
-    {
-        dirtyFlag_[8] = true;
-        if(!pJson[pMasqueradingVector[8]].isNull())
-        {
-            auto timeStr = pJson[pMasqueradingVector[8]].asString();
+            auto timeStr = pJson[pMasqueradingVector[6]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -492,14 +395,6 @@ void Collection::updateByMasqueradedJson(const Json::Value &pJson,
                 }
                 created_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
-        }
-    }
-    if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
-    {
-        dirtyFlag_[9] = true;
-        if(!pJson[pMasqueradingVector[9]].isNull())
-        {
-            visibility_=std::make_shared<std::string>(pJson[pMasqueradingVector[9]].asString());
         }
     }
 }
@@ -553,25 +448,9 @@ void Collection::updateByJson(const Json::Value &pJson) noexcept(false)
             extra_=std::make_shared<std::string>(pJson["extra"].asString());
         }
     }
-    if(pJson.isMember("preview"))
-    {
-        dirtyFlag_[6] = true;
-        if(!pJson["preview"].isNull())
-        {
-            preview_=std::make_shared<std::string>(pJson["preview"].asString());
-        }
-    }
-    if(pJson.isMember("creator"))
-    {
-        dirtyFlag_[7] = true;
-        if(!pJson["creator"].isNull())
-        {
-            creator_=std::make_shared<int64_t>((int64_t)pJson["creator"].asInt64());
-        }
-    }
     if(pJson.isMember("created"))
     {
-        dirtyFlag_[8] = true;
+        dirtyFlag_[6] = true;
         if(!pJson["created"].isNull())
         {
             auto timeStr = pJson["created"].asString();
@@ -593,14 +472,6 @@ void Collection::updateByJson(const Json::Value &pJson) noexcept(false)
                 }
                 created_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
-        }
-    }
-    if(pJson.isMember("visibility"))
-    {
-        dirtyFlag_[9] = true;
-        if(!pJson["visibility"].isNull())
-        {
-            visibility_=std::make_shared<std::string>(pJson["visibility"].asString());
         }
     }
 }
@@ -747,50 +618,6 @@ void Collection::setExtraToNull() noexcept
     dirtyFlag_[5] = true;
 }
 
-const std::string &Collection::getValueOfPreview() const noexcept
-{
-    const static std::string defaultValue = std::string();
-    if(preview_)
-        return *preview_;
-    return defaultValue;
-}
-const std::shared_ptr<std::string> &Collection::getPreview() const noexcept
-{
-    return preview_;
-}
-void Collection::setPreview(const std::string &pPreview) noexcept
-{
-    preview_ = std::make_shared<std::string>(pPreview);
-    dirtyFlag_[6] = true;
-}
-void Collection::setPreview(std::string &&pPreview) noexcept
-{
-    preview_ = std::make_shared<std::string>(std::move(pPreview));
-    dirtyFlag_[6] = true;
-}
-void Collection::setPreviewToNull() noexcept
-{
-    preview_.reset();
-    dirtyFlag_[6] = true;
-}
-
-const int64_t &Collection::getValueOfCreator() const noexcept
-{
-    const static int64_t defaultValue = int64_t();
-    if(creator_)
-        return *creator_;
-    return defaultValue;
-}
-const std::shared_ptr<int64_t> &Collection::getCreator() const noexcept
-{
-    return creator_;
-}
-void Collection::setCreator(const int64_t &pCreator) noexcept
-{
-    creator_ = std::make_shared<int64_t>(pCreator);
-    dirtyFlag_[7] = true;
-}
-
 const ::trantor::Date &Collection::getValueOfCreated() const noexcept
 {
     const static ::trantor::Date defaultValue = ::trantor::Date();
@@ -805,29 +632,7 @@ const std::shared_ptr<::trantor::Date> &Collection::getCreated() const noexcept
 void Collection::setCreated(const ::trantor::Date &pCreated) noexcept
 {
     created_ = std::make_shared<::trantor::Date>(pCreated);
-    dirtyFlag_[8] = true;
-}
-
-const std::string &Collection::getValueOfVisibility() const noexcept
-{
-    const static std::string defaultValue = std::string();
-    if(visibility_)
-        return *visibility_;
-    return defaultValue;
-}
-const std::shared_ptr<std::string> &Collection::getVisibility() const noexcept
-{
-    return visibility_;
-}
-void Collection::setVisibility(const std::string &pVisibility) noexcept
-{
-    visibility_ = std::make_shared<std::string>(pVisibility);
-    dirtyFlag_[9] = true;
-}
-void Collection::setVisibility(std::string &&pVisibility) noexcept
-{
-    visibility_ = std::make_shared<std::string>(std::move(pVisibility));
-    dirtyFlag_[9] = true;
+    dirtyFlag_[6] = true;
 }
 
 void Collection::updateId(const uint64_t id)
@@ -842,10 +647,7 @@ const std::vector<std::string> &Collection::insertColumns() noexcept
         "tags",
         "content",
         "extra",
-        "preview",
-        "creator",
-        "created",
-        "visibility"
+        "created"
     };
     return inCols;
 }
@@ -909,42 +711,9 @@ void Collection::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[6])
     {
-        if(getPreview())
-        {
-            binder << getValueOfPreview();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[7])
-    {
-        if(getCreator())
-        {
-            binder << getValueOfCreator();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[8])
-    {
         if(getCreated())
         {
             binder << getValueOfCreated();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[9])
-    {
-        if(getVisibility())
-        {
-            binder << getValueOfVisibility();
         }
         else
         {
@@ -979,18 +748,6 @@ const std::vector<std::string> Collection::updateColumns() const
     if(dirtyFlag_[6])
     {
         ret.push_back(getColumnName(6));
-    }
-    if(dirtyFlag_[7])
-    {
-        ret.push_back(getColumnName(7));
-    }
-    if(dirtyFlag_[8])
-    {
-        ret.push_back(getColumnName(8));
-    }
-    if(dirtyFlag_[9])
-    {
-        ret.push_back(getColumnName(9));
     }
     return ret;
 }
@@ -1054,42 +811,9 @@ void Collection::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[6])
     {
-        if(getPreview())
-        {
-            binder << getValueOfPreview();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[7])
-    {
-        if(getCreator())
-        {
-            binder << getValueOfCreator();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[8])
-    {
         if(getCreated())
         {
             binder << getValueOfCreated();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[9])
-    {
-        if(getVisibility())
-        {
-            binder << getValueOfVisibility();
         }
         else
         {
@@ -1148,22 +872,6 @@ Json::Value Collection::toJson() const
     {
         ret["extra"]=Json::Value();
     }
-    if(getPreview())
-    {
-        ret["preview"]=getValueOfPreview();
-    }
-    else
-    {
-        ret["preview"]=Json::Value();
-    }
-    if(getCreator())
-    {
-        ret["creator"]=(Json::Int64)getValueOfCreator();
-    }
-    else
-    {
-        ret["creator"]=Json::Value();
-    }
     if(getCreated())
     {
         ret["created"]=getCreated()->toDbStringLocal();
@@ -1172,14 +880,6 @@ Json::Value Collection::toJson() const
     {
         ret["created"]=Json::Value();
     }
-    if(getVisibility())
-    {
-        ret["visibility"]=getValueOfVisibility();
-    }
-    else
-    {
-        ret["visibility"]=Json::Value();
-    }
     return ret;
 }
 
@@ -1187,7 +887,7 @@ Json::Value Collection::toMasqueradedJson(
     const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 10)
+    if(pMasqueradingVector.size() == 7)
     {
         if(!pMasqueradingVector[0].empty())
         {
@@ -1257,46 +957,13 @@ Json::Value Collection::toMasqueradedJson(
         }
         if(!pMasqueradingVector[6].empty())
         {
-            if(getPreview())
+            if(getCreated())
             {
-                ret[pMasqueradingVector[6]]=getValueOfPreview();
+                ret[pMasqueradingVector[6]]=getCreated()->toDbStringLocal();
             }
             else
             {
                 ret[pMasqueradingVector[6]]=Json::Value();
-            }
-        }
-        if(!pMasqueradingVector[7].empty())
-        {
-            if(getCreator())
-            {
-                ret[pMasqueradingVector[7]]=(Json::Int64)getValueOfCreator();
-            }
-            else
-            {
-                ret[pMasqueradingVector[7]]=Json::Value();
-            }
-        }
-        if(!pMasqueradingVector[8].empty())
-        {
-            if(getCreated())
-            {
-                ret[pMasqueradingVector[8]]=getCreated()->toDbStringLocal();
-            }
-            else
-            {
-                ret[pMasqueradingVector[8]]=Json::Value();
-            }
-        }
-        if(!pMasqueradingVector[9].empty())
-        {
-            if(getVisibility())
-            {
-                ret[pMasqueradingVector[9]]=getValueOfVisibility();
-            }
-            else
-            {
-                ret[pMasqueradingVector[9]]=Json::Value();
             }
         }
         return ret;
@@ -1350,22 +1017,6 @@ Json::Value Collection::toMasqueradedJson(
     {
         ret["extra"]=Json::Value();
     }
-    if(getPreview())
-    {
-        ret["preview"]=getValueOfPreview();
-    }
-    else
-    {
-        ret["preview"]=Json::Value();
-    }
-    if(getCreator())
-    {
-        ret["creator"]=(Json::Int64)getValueOfCreator();
-    }
-    else
-    {
-        ret["creator"]=Json::Value();
-    }
     if(getCreated())
     {
         ret["created"]=getCreated()->toDbStringLocal();
@@ -1373,14 +1024,6 @@ Json::Value Collection::toMasqueradedJson(
     else
     {
         ret["created"]=Json::Value();
-    }
-    if(getVisibility())
-    {
-        ret["visibility"]=getValueOfVisibility();
-    }
-    else
-    {
-        ret["visibility"]=Json::Value();
     }
     return ret;
 }
@@ -1417,24 +1060,9 @@ bool Collection::validateJsonForCreation(const Json::Value &pJson, std::string &
         if(!validJsonOfField(5, "extra", pJson["extra"], err, true))
             return false;
     }
-    if(pJson.isMember("preview"))
-    {
-        if(!validJsonOfField(6, "preview", pJson["preview"], err, true))
-            return false;
-    }
-    if(pJson.isMember("creator"))
-    {
-        if(!validJsonOfField(7, "creator", pJson["creator"], err, true))
-            return false;
-    }
     if(pJson.isMember("created"))
     {
-        if(!validJsonOfField(8, "created", pJson["created"], err, true))
-            return false;
-    }
-    if(pJson.isMember("visibility"))
-    {
-        if(!validJsonOfField(9, "visibility", pJson["visibility"], err, true))
+        if(!validJsonOfField(6, "created", pJson["created"], err, true))
             return false;
     }
     return true;
@@ -1443,7 +1071,7 @@ bool Collection::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                                                     const std::vector<std::string> &pMasqueradingVector,
                                                     std::string &err)
 {
-    if(pMasqueradingVector.size() != 10)
+    if(pMasqueradingVector.size() != 7)
     {
         err = "Bad masquerading vector";
         return false;
@@ -1505,30 +1133,6 @@ bool Collection::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                   return false;
           }
       }
-      if(!pMasqueradingVector[7].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[7]))
-          {
-              if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, true))
-                  return false;
-          }
-      }
-      if(!pMasqueradingVector[8].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[8]))
-          {
-              if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, true))
-                  return false;
-          }
-      }
-      if(!pMasqueradingVector[9].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[9]))
-          {
-              if(!validJsonOfField(9, pMasqueradingVector[9], pJson[pMasqueradingVector[9]], err, true))
-                  return false;
-          }
-      }
     }
     catch(const Json::LogicError &e)
     {
@@ -1574,24 +1178,9 @@ bool Collection::validateJsonForUpdate(const Json::Value &pJson, std::string &er
         if(!validJsonOfField(5, "extra", pJson["extra"], err, false))
             return false;
     }
-    if(pJson.isMember("preview"))
-    {
-        if(!validJsonOfField(6, "preview", pJson["preview"], err, false))
-            return false;
-    }
-    if(pJson.isMember("creator"))
-    {
-        if(!validJsonOfField(7, "creator", pJson["creator"], err, false))
-            return false;
-    }
     if(pJson.isMember("created"))
     {
-        if(!validJsonOfField(8, "created", pJson["created"], err, false))
-            return false;
-    }
-    if(pJson.isMember("visibility"))
-    {
-        if(!validJsonOfField(9, "visibility", pJson["visibility"], err, false))
+        if(!validJsonOfField(6, "created", pJson["created"], err, false))
             return false;
     }
     return true;
@@ -1600,7 +1189,7 @@ bool Collection::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                                   const std::vector<std::string> &pMasqueradingVector,
                                                   std::string &err)
 {
-    if(pMasqueradingVector.size() != 10)
+    if(pMasqueradingVector.size() != 7)
     {
         err = "Bad masquerading vector";
         return false;
@@ -1644,21 +1233,6 @@ bool Collection::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
       if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
       {
           if(!validJsonOfField(6, pMasqueradingVector[6], pJson[pMasqueradingVector[6]], err, false))
-              return false;
-      }
-      if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
-      {
-          if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, false))
-              return false;
-      }
-      if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
-      {
-          if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, false))
-              return false;
-      }
-      if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
-      {
-          if(!validJsonOfField(9, pMasqueradingVector[9], pJson[pMasqueradingVector[9]], err, false))
               return false;
       }
     }
@@ -1753,41 +1327,6 @@ bool Collection::validJsonOfField(size_t index,
             }
             break;
         case 6:
-            if(pJson.isNull())
-            {
-                return true;
-            }
-            if(!pJson.isString())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            break;
-        case 7:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(!pJson.isInt64())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            break;
-        case 8:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(!pJson.isString())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            break;
-        case 9:
             if(pJson.isNull())
             {
                 err="The " + fieldName + " column cannot be null";

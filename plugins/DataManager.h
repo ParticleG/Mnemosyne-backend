@@ -25,11 +25,15 @@ namespace mnemosyne::plugins {
 
         void shutdown() override;
 
-        Json::Value dataUpload(const helpers::RequestJson &requestJson);
+        Json::Value dataPost(const helpers::RequestJson &requestJson);
+
+        Json::Value dataUpload(const helpers::RequestJson &requestJson, const drogon::HttpFile &file);
 
         Json::Value dataFuzzy(const helpers::RequestJson &requestJson);
 
         Json::Value dataSearch(const helpers::RequestJson &requestJson);
+
+        Json::Value dataInfo(int64_t dataId);
 
         void dataModify(const helpers::RequestJson &requestJson);
 
@@ -40,6 +44,8 @@ namespace mnemosyne::plugins {
         Json::Value collectionFuzzy(const helpers::RequestJson &requestJson);
 
         Json::Value collectionSearch(const helpers::RequestJson &requestJson);
+
+        Json::Value collectionInfo(int64_t dataId);
 
         void collectionModify(const helpers::RequestJson &requestJson);
 

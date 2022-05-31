@@ -35,7 +35,7 @@ Collection::Collection() :
                     response.setReason(e);
                 }
         ),
-        _dataManager(app().getPlugin<DataManager>()){}
+        _dataManager(app().getPlugin<DataManager>()) {}
 
 void Collection::create(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
     ResponseJson response;
@@ -62,6 +62,16 @@ void Collection::search(const HttpRequestPtr &req, function<void(const HttpRespo
     handleExceptions([&]() {
         response.setData(_dataManager->collectionSearch(
                 req->attributes()->get<RequestJson>("requestJson")
+        ));
+    }, response);
+    response.httpCallback(callback);
+}
+
+void Collection::info(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback) {
+    ResponseJson response;
+    handleExceptions([&]() {
+        response.setData(_dataManager->collectionInfo(
+                req->attributes()->get<int64_t>("collectionId")
         ));
     }, response);
     response.httpCallback(callback);

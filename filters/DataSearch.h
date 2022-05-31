@@ -14,7 +14,6 @@
  * @param description: String
  * @param tags: Array
  * @param extra: String
- * @param creator: Int64
  * @param fromTime: timestamp
  * @param endTime: timestamp
  * @param page: UInt64

@@ -8,17 +8,15 @@
 #include <structures/ExceptionHandlers.h>
 
 /**
- * @brief This filter checks "Data::upload" request body
+ * @brief This filter checks "Data::upload" request is a multipart or not
  * @param type: String
  * @param name: String
  * @param description: String
  * @param tags: Array
- * @param content: String
  * @param extra: String
- * @param preview: String
  * @param collection: Int64
- * @param visibility: Int
  * @return requestJson: in request attributes
+ * @return file: in request attributes
  */
 namespace mnemosyne::filters {
     class DataUpload :
@@ -27,7 +25,6 @@ namespace mnemosyne::filters {
     public:
         static constexpr char projectName[] = CMAKE_PROJECT_NAME;
 
-    public:
         void doFilter(
                 const drogon::HttpRequestPtr &req,
                 drogon::FilterCallback &&failedCb,

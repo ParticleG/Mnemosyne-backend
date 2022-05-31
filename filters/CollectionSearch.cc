@@ -22,7 +22,6 @@ void CollectionSearch::doFilter(
         request.trim("description", JsonValue::String);
         request.trim("tags", JsonValue::Array);
         request.trim("extra", JsonValue::String);
-        request.trim("creator", JsonValue::Int64);
         request.trim("fromTime", JsonValue::String);
         request.trim("endTime", JsonValue::String);
         request.trim("page", JsonValue::UInt64);

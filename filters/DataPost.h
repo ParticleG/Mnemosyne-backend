@@ -8,21 +8,20 @@
 #include <structures/ExceptionHandlers.h>
 
 /**
- * @brief This filter trims "Collection::search" request body
+ * @brief This filter checks "Data::post" request body
+ * @param type: String
  * @param name: String
  * @param description: String
  * @param tags: Array
+ * @param content: String
  * @param extra: String
- * @param fromTime: timestamp
- * @param endTime: timestamp
- * @param page: UInt64
- * @param perPage: UInt64
+ * @param collection: Int64
  * @return requestJson: in request attributes
  */
 namespace mnemosyne::filters {
-    class CollectionSearch :
-            public drogon::HttpFilter<CollectionSearch>,
-            public structures::RequestJsonHandler<CollectionSearch> {
+    class DataPost :
+            public drogon::HttpFilter<DataPost>,
+            public structures::RequestJsonHandler<DataPost> {
     public:
         static constexpr char projectName[] = CMAKE_PROJECT_NAME;
 

@@ -23,13 +23,18 @@ void DataManager::initAndStart(const Json::Value &config) {
             config["redis"]["host"].isString() &&
             config["redis"]["port"].isUInt() &&
             config["redis"]["db"].isInt() &&
-            config["redis"]["timeout"].isUInt()
+            config["redis"]["timeout"].isUInt() &&
+            config["redis"]["expirations"]["cache"].isInt()
     )) {
         LOG_ERROR << R"("Invalid redis config")";
         abort();
     }
 
-    _dataRedis = make_unique<DataRedis>();
+    _dataRedis = make_unique<DataRedis>(move(DataRedis(
+            {
+                    chrono::minutes(config["redis"]["expirations"]["cache"].asInt64())
+            }
+    )));
 
     try {
         _dataRedis->connect(
@@ -53,12 +58,20 @@ void DataManager::shutdown() {
     LOG_INFO << "DataManager shutdown.";
 }
 
-Json::Value DataManager::dataUpload(const RequestJson &requestJson) {
+Json::Value DataManager::dataPost(const RequestJson &requestJson) {
     auto json = requestJson.copy();
     json["tags"] = postgresql::toPgArray(RequestJson{json["tags"]});
     Mnemosyne::Data data(json);
     _dataMapper->insert(data);
     return data.toJson();
+}
+
+Json::Value DataManager::dataUpload(const RequestJson &requestJson, const HttpFile &file) {
+    const auto md5 = file.getMd5();
+    LOG_DEBUG << md5;
+    // TODO: save file and generate address
+    return {};
+//    return dataPost(requestJson);
 }
 
 Json::Value DataManager::dataFuzzy(const RequestJson &requestJson) {
@@ -74,31 +87,33 @@ Json::Value DataManager::dataFuzzy(const RequestJson &requestJson) {
 
     const auto query = requestJson["query"].asString();
 
-    criteria = criteria && (orm::Criteria(
-            postgresql::toCustomSql(
-                    R"(to_tsvector('english', {}) @@ plainto_tsquery('english', $?))",
-                    Mnemosyne::Data::Cols::_name
-            ),
-            query
-    ) || orm::Criteria(
-            postgresql::toCustomSql(
-                    R"(to_tsvector('english', {}) @@ plainto_tsquery('english', $?))",
-                    Mnemosyne::Data::Cols::_description
-            ),
-            query
-    ) || orm::Criteria(
-            postgresql::toCustomSql(
-                    R"(to_tsvector('english', text_arr_to_text({})) @@ plainto_tsquery('english', $?))",
-                    Mnemosyne::Data::Cols::_tags
-            ),
-            query
-    ) || orm::Criteria(
-            postgresql::toCustomSql(
-                    R"(to_tsvector('english', {}) @@ plainto_tsquery('english', $?))",
-                    Mnemosyne::Data::Cols::_extra
-            ),
-            query
-    ));
+    if (!query.empty()) {
+        criteria = criteria && (orm::Criteria(
+                postgresql::toCustomSql(
+                        R"(to_tsvector('english', {}) @@ plainto_tsquery('english', $?))",
+                        Mnemosyne::Data::Cols::_name
+                ),
+                query
+        ) || orm::Criteria(
+                postgresql::toCustomSql(
+                        R"(to_tsvector('english', {}) @@ plainto_tsquery('english', $?))",
+                        Mnemosyne::Data::Cols::_description
+                ),
+                query
+        ) || orm::Criteria(
+                postgresql::toCustomSql(
+                        R"(to_tsvector('english', text_arr_to_text({})) @@ plainto_tsquery('english', $?))",
+                        Mnemosyne::Data::Cols::_tags
+                ),
+                query
+        ) || orm::Criteria(
+                postgresql::toCustomSql(
+                        R"(to_tsvector('english', {}) @@ plainto_tsquery('english', $?))",
+                        Mnemosyne::Data::Cols::_extra
+                ),
+                query
+        ));
+    }
 
     size_t page = 1, perPage = 30;
     if (requestJson["page"].isUInt64()) {
@@ -163,13 +178,6 @@ Json::Value DataManager::dataSearch(const RequestJson &requestJson) {
                 requestJson["extra"].asString()
         );
     }
-    if (requestJson.check("creator", JsonValue::Int64)) {
-        criteria = criteria && orm::Criteria(
-                Mnemosyne::Data::Cols::_creator,
-                orm::CompareOperator::EQ,
-                requestJson["creator"].asInt64()
-        );
-    }
 
     size_t page = 1, perPage = 30;
     if (requestJson["page"].isUInt64()) {
@@ -184,6 +192,19 @@ Json::Value DataManager::dataSearch(const RequestJson &requestJson) {
     }
 
     return result;
+}
+
+Json::Value DataManager::dataInfo(int64_t dataId) {
+    try {
+        return _dataMapper->findByPrimaryKey(dataId).toJson();
+    } catch (const orm::UnexpectedRows &e) {
+        LOG_DEBUG << "Unexpected rows: " << e.what();
+        throw ResponseException(
+                i18n("dataNotFound"),
+                ResultCode::notFound,
+                k404NotFound
+        );
+    }
 }
 
 void DataManager::dataModify(const RequestJson &requestJson) {
@@ -296,13 +317,6 @@ Json::Value DataManager::collectionSearch(const RequestJson &requestJson) {
                 requestJson["extra"].asString()
         );
     }
-    if (requestJson.check("creator", JsonValue::Int64)) {
-        criteria = criteria && orm::Criteria(
-                Mnemosyne::Collection::Cols::_creator,
-                orm::CompareOperator::EQ,
-                requestJson["creator"].asInt64()
-        );
-    }
 
     size_t page = 1, perPage = 30;
     if (requestJson["page"].isUInt64()) {
@@ -317,6 +331,11 @@ Json::Value DataManager::collectionSearch(const RequestJson &requestJson) {
     }
 
     return result;
+}
+
+Json::Value DataManager::collectionInfo(int64_t collectionId) {
+    auto collection = _collectionMapper->findByPrimaryKey(collectionId);
+    return collection.toJson();
 }
 
 void DataManager::collectionModify(const RequestJson &requestJson) {

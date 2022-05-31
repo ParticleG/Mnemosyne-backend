@@ -25,7 +25,7 @@
             "rdbms": "postgresql",
             "host": "101.43.110.22",
             "port": 5432,
-            "dbname": "Mnemosyne",
+            "dbname": "testing",
             "user": "particleg",
             "passwd": "gzy2000324",
             "is_fast": false,
@@ -151,7 +151,10 @@
                     "host": "127.0.0.1",
                     "port": 6379,
                     "db": 5,
-                    "timeout": 3000
+                    "timeout": 3000,
+                    "expirations": {
+                        "cache": 60,
+                    }
                 }
             }
         }
