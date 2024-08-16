@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DATABASE</ID>
+  <OriginalElement>52a67902-31dc-4c2e-b2d6-08a319a523be.SCHEMA:Mnemosyne.public</OriginalElement>
+  <nodes>
+    <node x="601.0" y="269.0">52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.images</node>
+    <node x="300.5" y="555.0">52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.statistics</node>
+    <node x="529.5" y="555.0">52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.users</node>
+    <node x="749.0" y="269.5">52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.audios</node>
+    <node x="897.0" y="269.5">52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.models</node>
+    <node x="453.0" y="269.5">52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.videos</node>
+    <node x="305.0" y="269.5">52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.ebooks</node>
+    <node x="157.0" y="269.5">52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.documents</node>
+    <node x="531.5" y="-17.0">52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.collections</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.audios" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.collections" relationship="REFERENCES">
+      <point x="0.0" y="-104.0" />
+      <point x="813.0" y="231.0" />
+      <point x="591.0" y="231.0" />
+      <point x="0.0" y="104.5" />
+    </edge>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.videos" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.users" relationship="REFERENCES">
+      <point x="0.0" y="104.0" />
+      <point x="517.0" y="517.0" />
+      <point x="591.0" y="517.0" />
+      <point x="0.0" y="-104.5" />
+    </edge>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.ebooks" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.collections" relationship="REFERENCES">
+      <point x="0.0" y="-104.0" />
+      <point x="369.0" y="231.0" />
+      <point x="591.0" y="231.0" />
+      <point x="0.0" y="104.5" />
+    </edge>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.models" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.collections" relationship="REFERENCES">
+      <point x="0.0" y="-104.0" />
+      <point x="961.0" y="231.0" />
+      <point x="591.0" y="231.0" />
+      <point x="0.0" y="104.5" />
+    </edge>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.videos" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.collections" relationship="REFERENCES">
+      <point x="0.0" y="-104.0" />
+      <point x="517.0" y="231.0" />
+      <point x="591.0" y="231.0" />
+      <point x="0.0" y="104.5" />
+    </edge>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.audios" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.users" relationship="REFERENCES">
+      <point x="0.0" y="104.0" />
+      <point x="813.0" y="517.0" />
+      <point x="591.0" y="517.0" />
+      <point x="0.0" y="-104.5" />
+    </edge>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.documents" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.users" relationship="REFERENCES">
+      <point x="0.0" y="104.0" />
+      <point x="221.0" y="517.0" />
+      <point x="591.0" y="517.0" />
+      <point x="0.0" y="-104.5" />
+    </edge>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.models" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.users" relationship="REFERENCES">
+      <point x="0.0" y="104.0" />
+      <point x="961.0" y="517.0" />
+      <point x="591.0" y="517.0" />
+      <point x="0.0" y="-104.5" />
+    </edge>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.images" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.users" relationship="REFERENCES">
+      <point x="0.0" y="104.5" />
+      <point x="665.0" y="517.0" />
+      <point x="591.0" y="517.0" />
+      <point x="0.0" y="-104.5" />
+    </edge>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.images" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.collections" relationship="REFERENCES">
+      <point x="0.0" y="-104.5" />
+      <point x="665.0" y="231.0" />
+      <point x="591.0" y="231.0" />
+      <point x="0.0" y="104.5" />
+    </edge>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.documents" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.collections" relationship="REFERENCES">
+      <point x="0.0" y="-104.0" />
+      <point x="221.0" y="231.0" />
+      <point x="591.0" y="231.0" />
+      <point x="0.0" y="104.5" />
+    </edge>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.statistics" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.users" relationship="REFERENCES">
+      <point x="68.5" y="11.0" />
+      <point x="-61.5" y="0.0" />
+    </edge>
+    <edge source="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.ebooks" target="52a67902-31dc-4c2e-b2d6-08a319a523be.TABLE:Mnemosyne.public.users" relationship="REFERENCES">
+      <point x="0.0" y="104.0" />
+      <point x="369.0" y="517.0" />
+      <point x="591.0" y="517.0" />
+      <point x="0.0" y="-104.5" />
+    </edge>
+  </edges>
+  <settings layout="分层" zoom="1.2999999999999998" showDependencies="false" x="593.4999999999999" y="374.2307692307693" />
+  <SelectedNodes />
+  <Categories>
+    <Category>列</Category>
+    <Category>注释</Category>
+    <Category>虚拟外键</Category>
+    <Category>键列</Category>
+  </Categories>
+</Diagram>
